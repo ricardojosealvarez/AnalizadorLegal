@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Analizador Legal AEPD</title>
+    <link rel="stylesheet" href="/static/styles.css" />
+  </head>
+  <body>
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="brand-mark">AL</div>
+        <div>
+          <h1>Analizador Legal</h1>
+          <p>Dictamenes AEPD</p>
+        </div>
+      </div>
+      <nav class="nav">
+        <a href="#explorar" class="active">Explorar</a>
+        <a href="#evolucion">Evolucion</a>
+        <a href="#doctrina">Doctrina</a>
+      </nav>
+      <section class="system">
+        <span id="docCount">-</span>
+        <small>informes indexados</small>
+      </section>
+    </aside>
+
+    <main class="shell">
+      <header class="topbar">
+        <div>
+          <h2>Mapa semantico de informes juridicos</h2>
+          <p>Materia, base legal, regimen y senales de cambio doctrinal en 25 anos de criterio juridico.</p>
+        </div>
+        <button id="refreshButton" type="button">Actualizar</button>
+      </header>
+
+      <section class="filters" id="explorar">
+        <label class="search">
+          <span>Busqueda semantica ligera</span>
+          <input id="queryInput" type="search" placeholder="Ej. interes legitimo videovigilancia laboral" />
+        </label>
+        <label>
+          <span>Materia</span>
+          <select id="materiaFilter"></select>
+        </label>
+        <label>
+          <span>Base legal</span>
+          <select id="baseFilter"></select>
+        </label>
+        <label>
+          <span>Regimen</span>
+          <select id="regimenFilter"></select>
+        </label>
+        <label>
+          <span>Desde</span>
+          <input id="yearFrom" type="number" min="1990" max="2030" placeholder="1999" />
+        </label>
+        <label>
+          <span>Hasta</span>
+          <input id="yearTo" type="number" min="1990" max="2030" placeholder="2026" />
+        </label>
+      </section>
+
+      <section class="grid">
+        <article class="panel wide" id="evolucion">
+          <div class="panel-title">
+            <h3>Evolucion temporal</h3>
+            <div class="timeline-copy">
+              <p>Volumen anual de dictamenes indexados.</p>
+              <div class="legend" aria-label="Leyenda de regimen temporal">
+                <span><i class="legend-swatch pre-rgpd"></i>LOPD 15/1999</span>
+                <span><i class="legend-swatch rgpd"></i>RGPD / LOPDGDD</span>
+              </div>
+            </div>
+          </div>
+          <canvas id="timeline" height="190"></canvas>
+        </article>
+
+        <article class="panel">
+          <div class="panel-title">
+            <h3>Temas muy analizados</h3>
+            <p>Materias con mayor frecuencia.</p>
+          </div>
+          <div id="commonTopics" class="rank-list"></div>
+        </article>
+
+        <article class="panel">
+          <div class="panel-title">
+            <h3>Temas poco analizados</h3>
+            <p>Materias presentes pero escasas.</p>
+          </div>
+          <div id="rareTopics" class="rank-list"></div>
+        </article>
+      </section>
+
+      <section class="workspace">
+        <article class="panel results-panel">
+          <div class="panel-title">
+            <h3>Resultados</h3>
+            <p id="resultMeta">Busca o filtra para empezar.</p>
+          </div>
+          <div id="results" class="results"></div>
+          <div class="pagination" aria-label="Paginacion de resultados">
+            <button id="prevPageButton" type="button">Anterior</button>
+            <span id="pageIndicator">Pagina 1</span>
+            <button id="nextPageButton" type="button">Siguiente</button>
+          </div>
+        </article>
+
+        <article class="panel detail-panel" id="doctrina">
+          <div class="panel-title">
+            <h3>Ficha juridica</h3>
+            <p>Selecciona un informe para ver fragmentos y metadatos.</p>
+          </div>
+          <div id="detail" class="detail empty">Ningun informe seleccionado.</div>
+        </article>
+      </section>
+    </main>
+
+    <script src="/static/app.js"></script>
+  </body>
+</html>

@@ -1,0 +1,10 @@
+services:
+  - type: web
+    name: analizador-legal
+    runtime: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: python -m legal_analyzer serve --host 0.0.0.0
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.12.0
+
