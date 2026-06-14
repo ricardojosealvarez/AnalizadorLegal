@@ -6,4 +6,4 @@ data/*.sqlite-*
 data/extracted/
 node_modules/
 .env
-
+.env.local

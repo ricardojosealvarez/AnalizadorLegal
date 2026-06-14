@@ -11,6 +11,8 @@ from pathlib import Path
 from typing import Any
 
 from .classifier import DOCTRINAL_CHANGE_PATTERNS, classify, normalize
+from .llm_summarizer import LLMSummaryError, summarize_with_openai
+from .nvidia_summarizer import NvidiaSummaryError, summarize_with_nvidia
 from .pdf_extract import chunk_text, extract_pdf_text, infer_reference_from_name, infer_title, infer_year_from_name
 from .summarizer import summarize_document
 
@@ -50,6 +52,18 @@ CREATE TABLE IF NOT EXISTS summaries (
     conclusions_json TEXT NOT NULL,
     method TEXT NOT NULL,
     generated_at REAL NOT NULL
+);
+CREATE TABLE IF NOT EXISTS summary_variants (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    document_id INTEGER NOT NULL REFERENCES documents(id) ON DELETE CASCADE,
+    provider TEXT NOT NULL,
+    model TEXT NOT NULL,
+    overview TEXT NOT NULL,
+    key_points_json TEXT NOT NULL,
+    conclusions_json TEXT NOT NULL,
+    method TEXT NOT NULL,
+    generated_at REAL NOT NULL,
+    UNIQUE(document_id, provider, model)
 );
 CREATE VIRTUAL TABLE IF NOT EXISTS chunks_fts USING fts5(
     text,
@@ -457,6 +471,7 @@ def absorb_candidate_rows(
 def get_document(db_path: Path, reference: str, query: str = "") -> dict[str, Any] | None:
     with connect(db_path) as con:
         ensure_summary_schema(con)
+        ensure_summary_variants_schema(con)
         doc = con.execute("SELECT * FROM documents WHERE reference = ?", (reference,)).fetchone()
         if not doc:
             return None
@@ -466,8 +481,22 @@ def get_document(db_path: Path, reference: str, query: str = "") -> dict[str, An
             [doc["id"]],
         )
         summary = get_or_create_summary(con, doc, chunks)
+        summary_variants = [
+            hydrate_summary_variant(row)
+            for row in con.execute(
+                """
+                SELECT provider, model, overview, key_points_json,
+                       conclusions_json, method, generated_at
+                FROM summary_variants
+                WHERE document_id = ?
+                ORDER BY generated_at DESC
+                """,
+                (doc["id"],),
+            ).fetchall()
+        ]
     hydrated = hydrate_document(dict(doc))
     hydrated["summary"] = summary
+    hydrated["summary_variants"] = summary_variants
     hydrated["chunks"] = select_key_chunks(chunks, query=query, limit=5)
     return hydrated
 
@@ -497,6 +526,147 @@ def precompute_summaries(db_path: Path, limit: int | None = None, force: bool = 
         return stats
 
 
+def precompute_llm_summaries(db_path: Path, limit: int | None = None, force: bool = False) -> dict[str, Any]:
+    with connect(db_path) as con:
+        ensure_summary_schema(con)
+        query = """
+            SELECT d.*
+            FROM documents d
+            LEFT JOIN summaries s ON s.document_id = d.id
+            WHERE d.needs_ocr = 0
+              AND (? OR s.method IS NULL OR s.method NOT LIKE 'openai:%')
+            ORDER BY d.year DESC, d.reference DESC
+        """
+        docs = con.execute(query, (1 if force else 0,)).fetchall()
+        if limit:
+            docs = docs[:limit]
+        stats: dict[str, Any] = {
+            "seen": len(docs),
+            "attempted": 0,
+            "summarized": 0,
+            "failed": 0,
+            "failures": [],
+        }
+        for doc in docs:
+            stats["attempted"] += 1
+            chunks = rows(
+                con,
+                "SELECT chunk_index, text FROM chunks WHERE document_id = ? ORDER BY chunk_index",
+                [doc["id"]],
+            )
+            try:
+                create_llm_summary(con, doc, chunks)
+                stats["summarized"] += 1
+            except LLMSummaryError as exc:
+                stats["failed"] += 1
+                stats["failures"].append({"reference": doc["reference"], "error": str(exc)})
+                error_text = str(exc).lower()
+                if "no tiene cuota" in error_text or "clave de openai no es valida" in error_text:
+                    stats["stopped_early"] = True
+                    stats["stop_reason"] = str(exc)
+                    break
+        return stats
+
+
+def precompute_nvidia_summaries(db_path: Path, limit: int = 5, force: bool = False) -> dict[str, Any]:
+    with connect(db_path) as con:
+        ensure_summary_schema(con)
+        ensure_summary_variants_schema(con)
+        query = """
+            SELECT d.*
+            FROM documents d
+            JOIN summaries s ON s.document_id = d.id
+            LEFT JOIN summary_variants v
+              ON v.document_id = d.id AND v.provider = 'nvidia'
+            WHERE d.needs_ocr = 0
+              AND s.method LIKE 'openai:%'
+              AND (? OR v.document_id IS NULL)
+            ORDER BY d.year DESC, d.reference DESC
+            LIMIT ?
+        """
+        docs = con.execute(query, (1 if force else 0, limit)).fetchall()
+        stats: dict[str, Any] = {
+            "seen": len(docs),
+            "summarized": 0,
+            "failed": 0,
+            "references": [],
+            "failures": [],
+        }
+        for doc in docs:
+            chunks = rows(
+                con,
+                "SELECT chunk_index, text FROM chunks WHERE document_id = ? ORDER BY chunk_index",
+                [doc["id"]],
+            )
+            try:
+                summary = summarize_with_nvidia(select_key_chunks(chunks, limit=7), dict(doc))
+                save_summary_variant(con, doc["id"], summary)
+                stats["summarized"] += 1
+                stats["references"].append(doc["reference"])
+            except NvidiaSummaryError as exc:
+                stats["failed"] += 1
+                stats["failures"].append({"reference": doc["reference"], "error": str(exc)})
+        return stats
+
+
+def generate_document_llm_summary(db_path: Path, reference: str, force: bool = False) -> dict[str, Any] | None:
+    with connect(db_path) as con:
+        ensure_summary_schema(con)
+        doc = con.execute("SELECT * FROM documents WHERE reference = ?", (reference,)).fetchone()
+        if not doc:
+            return None
+        if not force:
+            existing = con.execute("SELECT * FROM summaries WHERE document_id = ?", (doc["id"],)).fetchone()
+            if existing and str(existing["method"]).startswith("openai:"):
+                return hydrate_summary(existing)
+        chunks = rows(
+            con,
+            "SELECT chunk_index, text FROM chunks WHERE document_id = ? ORDER BY chunk_index",
+            [doc["id"]],
+        )
+        return create_llm_summary(con, doc, chunks)
+
+
+def create_llm_summary(
+    con: sqlite3.Connection,
+    doc: sqlite3.Row,
+    chunks: list[dict[str, Any]],
+) -> dict[str, Any]:
+    key_chunks = select_key_chunks(chunks, limit=7)
+    metadata = {
+        "reference": doc["reference"],
+        "title": doc["title"],
+        "year": doc["year"],
+        "materia": doc["materia"],
+        "base_legal": doc["base_legal"],
+        "regimen": doc["regimen"],
+    }
+    summary = summarize_with_openai(key_chunks, metadata)
+    generated_at = time.time()
+    con.execute(
+        """
+        INSERT INTO summaries (document_id, overview, key_points_json, conclusions_json, method, generated_at)
+        VALUES (?, ?, ?, ?, ?, ?)
+        ON CONFLICT(document_id) DO UPDATE SET
+            overview = excluded.overview,
+            key_points_json = excluded.key_points_json,
+            conclusions_json = excluded.conclusions_json,
+            method = excluded.method,
+            generated_at = excluded.generated_at
+        """,
+        (
+            doc["id"],
+            summary["overview"],
+            json.dumps(summary["key_points"], ensure_ascii=False),
+            json.dumps(summary["conclusions"], ensure_ascii=False),
+            summary["method"],
+            generated_at,
+        ),
+    )
+    con.commit()
+    return {**summary, "generated_at": generated_at}
+
+
 def ensure_summary_schema(con: sqlite3.Connection) -> None:
     con.execute(
         """
@@ -510,6 +680,54 @@ def ensure_summary_schema(con: sqlite3.Connection) -> None:
         )
         """
     )
+
+
+def ensure_summary_variants_schema(con: sqlite3.Connection) -> None:
+    con.execute(
+        """
+        CREATE TABLE IF NOT EXISTS summary_variants (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            document_id INTEGER NOT NULL REFERENCES documents(id) ON DELETE CASCADE,
+            provider TEXT NOT NULL,
+            model TEXT NOT NULL,
+            overview TEXT NOT NULL,
+            key_points_json TEXT NOT NULL,
+            conclusions_json TEXT NOT NULL,
+            method TEXT NOT NULL,
+            generated_at REAL NOT NULL,
+            UNIQUE(document_id, provider, model)
+        )
+        """
+    )
+
+
+def save_summary_variant(con: sqlite3.Connection, document_id: int, summary: dict[str, Any]) -> None:
+    con.execute(
+        """
+        INSERT INTO summary_variants (
+            document_id, provider, model, overview, key_points_json,
+            conclusions_json, method, generated_at
+        )
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+        ON CONFLICT(document_id, provider, model) DO UPDATE SET
+            overview = excluded.overview,
+            key_points_json = excluded.key_points_json,
+            conclusions_json = excluded.conclusions_json,
+            method = excluded.method,
+            generated_at = excluded.generated_at
+        """,
+        (
+            document_id,
+            summary["provider"],
+            summary["model"],
+            summary["overview"],
+            json.dumps(summary["key_points"], ensure_ascii=False),
+            json.dumps(summary["conclusions"], ensure_ascii=False),
+            summary["method"],
+            time.time(),
+        ),
+    )
+    con.commit()
 
 
 def get_or_create_summary(
@@ -720,6 +938,19 @@ def hydrate_document(row: dict[str, Any] | sqlite3.Row) -> dict[str, Any]:
 def hydrate_summary(row: dict[str, Any] | sqlite3.Row) -> dict[str, Any]:
     data = dict(row)
     return {
+        "overview": data["overview"],
+        "key_points": json.loads(data["key_points_json"]),
+        "conclusions": json.loads(data["conclusions_json"]),
+        "method": data["method"],
+        "generated_at": data["generated_at"],
+    }
+
+
+def hydrate_summary_variant(row: dict[str, Any] | sqlite3.Row) -> dict[str, Any]:
+    data = dict(row)
+    return {
+        "provider": data["provider"],
+        "model": data["model"],
         "overview": data["overview"],
         "key_points": json.loads(data["key_points_json"]),
         "conclusions": json.loads(data["conclusions_json"]),

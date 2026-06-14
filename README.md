@@ -20,6 +20,7 @@ El corpus PDF se mantiene fuera de este repositorio y se lee por defecto desde:
   - senales de cambio doctrinal
 - Muestra evolucion anual, temas frecuentes, temas escasos y fichas por informe.
 - Muestra resumen cacheado de cada dictamen, puntos principales y conclusiones.
+- Puede mejorar los resumenes con OpenAI y conservarlos en SQLite para no repetir costes.
 - Pagina los resultados de busqueda.
 
 ## Datos incluidos para despliegue
@@ -39,8 +40,18 @@ Nota: los PDFs completos originales no se incluyen en este repositorio por taman
 ```bash
 /Users/ricardo/.cache/codex-runtimes/codex-primary-runtime/dependencies/python/bin/python3 -m legal_analyzer ingest
 /Users/ricardo/.cache/codex-runtimes/codex-primary-runtime/dependencies/python/bin/python3 -m legal_analyzer summarize
+/Users/ricardo/.cache/codex-runtimes/codex-primary-runtime/dependencies/python/bin/python3 -m legal_analyzer summarize-llm --limit 5
+/Users/ricardo/.cache/codex-runtimes/codex-primary-runtime/dependencies/python/bin/python3 -m legal_analyzer summarize-nvidia --limit 5
 /Users/ricardo/.cache/codex-runtimes/codex-primary-runtime/dependencies/python/bin/python3 -m legal_analyzer serve --port 8000
 ```
+
+La capa LLM usa `OPENAI_API_KEY` desde el entorno o desde `.env.local`. El modelo
+puede configurarse con `OPENAI_SUMMARY_MODEL`; por defecto se usa `gpt-5.4-mini`.
+Los resumenes se generan con fragmentos juridicamente relevantes y solo
+reemplazan la version anterior cuando la llamada finaliza correctamente.
+
+Las pruebas con NVIDIA usan `NVIDIA_API_KEY` y guardan sus resultados en
+`summary_variants`, sin reemplazar el resumen principal de OpenAI.
 
 Despues abre:
 

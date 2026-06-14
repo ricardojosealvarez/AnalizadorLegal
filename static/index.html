@@ -62,6 +62,21 @@
         </label>
       </section>
 
+      <section class="panel treatment-panel" id="evaluar">
+        <div class="panel-title">
+          <h3>Evaluar tratamiento</h3>
+          <p>Valoracion orientativa basada en informes AEPD del corpus.</p>
+        </div>
+        <div class="treatment-form">
+          <label>
+            <span>Descripcion del tratamiento</span>
+            <textarea id="treatmentInput" rows="5" placeholder="Ej. Conservacion durante cinco anos de documentacion laboral para prevenir fraude y atender reclamaciones..."></textarea>
+          </label>
+          <button id="analyzeTreatmentButton" type="button">Evaluar legalidad orientativa</button>
+        </div>
+        <div id="treatmentAnalysis" class="analysis-output empty">Introduce un tratamiento para ver informes que lo apoyan o cuestionan.</div>
+      </section>
+
       <section class="grid">
         <article class="panel wide" id="evolucion">
           <div class="panel-title">

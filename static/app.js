@@ -14,6 +14,17 @@ async function fetchJson(url) {
   return response.json();
 }
 
+async function postJson(url, payload) {
+  const response = await fetch(url, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+  });
+  const data = await response.json();
+  if (!response.ok) throw new Error(data.error || `HTTP ${response.status}`);
+  return data;
+}
+
 function optionList(items, placeholder) {
   return [`<option value="">${placeholder}</option>`]
     .concat(items.map((item) => `<option value="${escapeHtml(item.label)}">${escapeHtml(item.label)} (${item.count})</option>`))
@@ -56,6 +67,82 @@ function bindEvents() {
       runSearch();
     }
   });
+  $("#analyzeTreatmentButton").addEventListener("click", analyzeTreatment);
+}
+
+async function analyzeTreatment() {
+  const description = $("#treatmentInput").value.trim();
+  const target = $("#treatmentAnalysis");
+  if (!description) {
+    target.innerHTML = `<div class="empty">Describe primero el tratamiento de datos.</div>`;
+    return;
+  }
+  target.innerHTML = `<div class="empty">Analizando tratamiento y buscando doctrina relacionada...</div>`;
+  const analysis = await postJson("/api/analyze-treatment", { description, limit: 14 });
+  if (analysis.error) {
+    target.innerHTML = `<div class="empty">${escapeHtml(analysis.error)}</div>`;
+    return;
+  }
+  renderTreatmentAnalysis(analysis);
+}
+
+function renderTreatmentAnalysis(analysis) {
+  const target = $("#treatmentAnalysis");
+  target.innerHTML = `
+    <div class="analysis-verdict ${escapeHtml(analysis.orientation.label.replaceAll(" ", "-"))}">
+      <div>
+        <span>Orientacion</span>
+        <strong>${escapeHtml(analysis.orientation.label)}</strong>
+        <p>${escapeHtml(analysis.orientation.rationale)}</p>
+      </div>
+      <div class="confidence">
+        <span>Confianza</span>
+        <strong>${escapeHtml(analysis.orientation.confidence)}</strong>
+      </div>
+    </div>
+    <div class="analysis-detected">
+      <span class="chip">${escapeHtml(analysis.detected.materia)}</span>
+      <span class="chip">${escapeHtml(analysis.detected.base_legal)}</span>
+      <span class="chip">${escapeHtml(analysis.detected.regimen)}</span>
+      ${analysis.terms.map((term) => `<span class="chip">${escapeHtml(term)}</span>`).join("")}
+    </div>
+    <div class="analysis-section">
+      <h4>Riesgos y cautelas</h4>
+      <ul>${analysis.risks.map((risk) => `<li>${escapeHtml(risk)}</li>`).join("")}</ul>
+    </div>
+    <div class="analysis-columns">
+      ${reportGroup("Informes que apoyan", analysis.supporting_reports)}
+      ${reportGroup("Informes que cuestionan", analysis.questioning_reports)}
+      ${reportGroup("Informes condicionados", analysis.conditional_reports)}
+    </div>
+    <p class="analysis-disclaimer">${escapeHtml(analysis.disclaimer)}</p>
+  `;
+  target.querySelectorAll(".analysis-report").forEach((card) => {
+    card.addEventListener("click", () => loadDocument(card.dataset.reference));
+  });
+}
+
+function reportGroup(title, reports) {
+  const body = reports.length
+    ? reports.slice(0, 5).map(analysisReportCard).join("")
+    : `<div class="empty">No se han localizado informes en esta categoria.</div>`;
+  return `<section class="analysis-section"><h4>${title}</h4>${body}</section>`;
+}
+
+function analysisReportCard(report) {
+  return `
+    <article class="analysis-report" data-reference="${escapeHtml(report.reference)}">
+      <div>
+        <strong>${escapeHtml(report.reference)}</strong>
+        <span>${report.year || "s/f"} · ${escapeHtml(report.regimen)}</span>
+      </div>
+      <p>${escapeHtml(report.summary || report.snippet.replace(/<[^>]+>/g, "")).slice(0, 260)}...</p>
+      <div class="meta">
+        <span class="chip">${escapeHtml(report.stance)}</span>
+        <span class="chip">vigencia ${escapeHtml(report.vigencia.level)} · ${report.vigencia.score}</span>
+      </div>
+    </article>
+  `;
 }
 
 async function runSearch(options = {}) {
@@ -156,17 +243,59 @@ async function loadDocument(reference) {
       <span class="chip">${doc.page_count} paginas</span>
     </div>
     <p>${escapeHtml(doc.title)}</p>
-    ${summaryBlock(doc.summary)}
+    ${summaryBlock(doc.summary, doc.summary_variants || [], doc.reference)}
     <div class="fragment-title">Fragmentos destacados</div>
     ${doc.chunks.map(keyChunk).join("")}
   `;
+  const llmButton = $("#generateLlmSummaryButton");
+  if (llmButton) {
+    llmButton.addEventListener("click", () => generateLlmSummary(doc.reference));
+  }
+  bindSummaryVariants();
 }
 
-function summaryBlock(summary) {
+function summaryBlock(summary, variants, reference) {
   if (!summary) return "";
+  const summaries = [summary, ...variants];
+  const selector = summaries.length > 1
+    ? `<div class="summary-provider-tabs" role="tablist" aria-label="Proveedor del resumen">
+        ${summaries.map((item, index) => `
+          <button
+            class="summary-provider-tab ${index === 0 ? "active" : ""}"
+            type="button"
+            role="tab"
+            aria-selected="${index === 0 ? "true" : "false"}"
+            data-summary-index="${index}"
+          >${escapeHtml(summaryProviderName(item))}</button>
+        `).join("")}
+      </div>`
+    : "";
   return `
     <section class="summary">
-      <h5>Resumen del dictamen</h5>
+      <div class="summary-head">
+        <div>
+          <h5>Resumen del dictamen</h5>
+        </div>
+        <button
+          id="generateLlmSummaryButton"
+          class="summary-action"
+          type="button"
+          data-reference="${escapeHtml(reference)}"
+        >${String(summary.method || "").startsWith("openai:") ? "Regenerar con OpenAI" : "Mejorar con OpenAI"}</button>
+      </div>
+      ${selector}
+      <div id="summaryContent">
+        ${summaryContentMarkup(summary)}
+      </div>
+      <script id="summaryVariantsData" type="application/json">${safeJsonForHtml(summaries)}</script>
+    </section>
+  `;
+}
+
+function summaryContentMarkup(summary) {
+  const isLlm = /^(openai|nvidia):/.test(String(summary.method || ""));
+  return `
+      <span class="summary-source ${isLlm ? "llm" : ""}">${escapeHtml(summarySourceLabel(summary))}</span>
       <p>${escapeHtml(summary.overview)}</p>
       <div class="summary-columns">
         <div>
@@ -178,8 +307,61 @@ function summaryBlock(summary) {
           <ul>${(summary.conclusions || []).map((item) => `<li>${escapeHtml(item)}</li>`).join("")}</ul>
         </div>
       </div>
-    </section>
   `;
+}
+
+function bindSummaryVariants() {
+  const dataNode = $("#summaryVariantsData");
+  if (!dataNode) return;
+  const summaries = JSON.parse(dataNode.textContent);
+  document.querySelectorAll(".summary-provider-tab").forEach((button) => {
+    button.addEventListener("click", () => {
+      const index = Number(button.dataset.summaryIndex);
+      $("#summaryContent").innerHTML = summaryContentMarkup(summaries[index]);
+      document.querySelectorAll(".summary-provider-tab").forEach((tab) => {
+        const active = tab === button;
+        tab.classList.toggle("active", active);
+        tab.setAttribute("aria-selected", String(active));
+      });
+    });
+  });
+}
+
+function summaryProviderName(summary) {
+  const method = String(summary.method || "");
+  if (method.startsWith("openai:")) return "OpenAI";
+  if (method.startsWith("nvidia:")) return "NVIDIA";
+  return "Extractivo";
+}
+
+function summarySourceLabel(summary) {
+  const provider = summaryProviderName(summary);
+  if (provider === "Extractivo") return "Resumen extractivo";
+  const model = summary.model || String(summary.method || "").split(":").slice(1).join(":");
+  return `${provider} · ${model}`;
+}
+
+function safeJsonForHtml(value) {
+  return JSON.stringify(value)
+    .replaceAll("&", "\\u0026")
+    .replaceAll("<", "\\u003c")
+    .replaceAll(">", "\\u003e");
+}
+
+async function generateLlmSummary(reference) {
+  const button = $("#generateLlmSummaryButton");
+  if (!button) return;
+  const originalLabel = button.textContent;
+  button.disabled = true;
+  button.textContent = "Generando...";
+  try {
+    await postJson(`/api/document/${encodeURIComponent(reference)}/llm-summary`, {});
+    await loadDocument(reference);
+  } catch (error) {
+    button.disabled = false;
+    button.textContent = originalLabel;
+    window.alert(`No se pudo generar el resumen: ${error.message}`);
+  }
 }
 
 function keyChunk(chunk) {
