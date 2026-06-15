@@ -1,0 +1,202 @@
+{"generated_at": 1781505519.7480052, "reference": "2025-0072", "status": "timeout", "duration_seconds": 90.791, "error": "La solicitud a NVIDIA excedio el tiempo de espera."}
+{"generated_at": 1781505620.357901, "reference": "2025-0068", "status": "timeout", "duration_seconds": 90.605, "error": "La solicitud a NVIDIA excedio el tiempo de espera."}
+{"generated_at": 1781505984.0102348, "reference": "2025-0072", "status": "timeout", "duration_seconds": 60.706, "error": "La solicitud a NVIDIA excedio el tiempo de espera."}
+{"generated_at": 1781506360.5641851, "reference": "2025-0072", "status": "timeout", "duration_seconds": 90.795, "error": "La solicitud a NVIDIA excedio el tiempo de espera."}
+{"generated_at": 1781506461.2494102, "reference": "2025-0068", "status": "timeout", "duration_seconds": 90.684, "error": "La solicitud a NVIDIA excedio el tiempo de espera."}
+{"generated_at": 1781506991.348342, "reference": "2025-0072", "status": "timeout", "duration_seconds": 60.707, "error": "La solicitud a NVIDIA excedio el tiempo de espera."}
+{"generated_at": 1781507920.199692, "reference": "2025-0072", "status": "timeout", "duration_seconds": 60.709, "error": "La solicitud a NVIDIA excedio el tiempo de espera."}
+{"generated_at": 1781508111.202871, "reference": "2025-0072", "status": "ok", "duration_seconds": 56.239}
+{"generated_at": 1781508201.2957718, "reference": "2025-0068", "status": "timeout", "duration_seconds": 60.089, "error": "La solicitud a NVIDIA excedio el tiempo de espera."}
+{"generated_at": 1781509224.639924, "reference": "2025-0068", "status": "timeout", "duration_seconds": 60.721, "error": "La solicitud a NVIDIA excedio el tiempo de espera."}
+{"generated_at": 1781510064.929245, "reference": "2025-0068", "status": "timeout", "duration_seconds": 60.696, "error": "La solicitud a NVIDIA excedio el tiempo de espera."}
+{"generated_at": 1781510636.6245918, "reference": "2025-0068", "status": "timeout", "duration_seconds": 60.695, "error": "La solicitud a NVIDIA excedio el tiempo de espera."}
+{"generated_at": 1781512951.741538, "reference": "2025-0068", "status": "ok", "duration_seconds": 69.179}
+{"generated_at": 1781513182.677682, "reference": "2025-0067", "status": "ok", "duration_seconds": 200.932}
+{"generated_at": 1781513330.777735, "reference": "2025-0066", "status": "ok", "duration_seconds": 118.1}
+{"generated_at": 1781517747.445298, "reference": "2025-0065", "status": "error", "duration_seconds": 0.589, "error": "No se pudo conectar con NVIDIA: [Errno 8] nodename nor servname provided, or not known"}
+{"generated_at": 1781517749.478373, "reference": "2025-0064", "status": "error", "duration_seconds": 0.027, "error": "No se pudo conectar con NVIDIA: [Errno 8] nodename nor servname provided, or not known"}
+{"generated_at": 1781517751.550227, "reference": "2025-0063", "status": "error", "duration_seconds": 0.067, "error": "No se pudo conectar con NVIDIA: [Errno 8] nodename nor servname provided, or not known"}
+{"generated_at": 1781517753.584228, "reference": "2025-0062", "status": "error", "duration_seconds": 0.03, "error": "No se pudo conectar con NVIDIA: [Errno 8] nodename nor servname provided, or not known"}
+{"generated_at": 1781517755.5966752, "reference": "2025-0061", "status": "error", "duration_seconds": 0.008, "error": "No se pudo conectar con NVIDIA: [Errno 8] nodename nor servname provided, or not known"}
+{"generated_at": 1781517757.6293519, "reference": "2025-0060", "status": "error", "duration_seconds": 0.028, "error": "No se pudo conectar con NVIDIA: [Errno 8] nodename nor servname provided, or not known"}
+{"generated_at": 1781517759.646943, "reference": "2025-0059", "status": "error", "duration_seconds": 0.013, "error": "No se pudo conectar con NVIDIA: [Errno 8] nodename nor servname provided, or not known"}
+{"generated_at": 1781517761.66224, "reference": "2025-0058", "status": "error", "duration_seconds": 0.013, "error": "No se pudo conectar con NVIDIA: [Errno 8] nodename nor servname provided, or not known"}
+{"generated_at": 1781517763.680736, "reference": "2025-0057", "status": "error", "duration_seconds": 0.014, "error": "No se pudo conectar con NVIDIA: [Errno 8] nodename nor servname provided, or not known"}
+{"generated_at": 1781517765.695831, "reference": "2025-0056", "status": "error", "duration_seconds": 0.011, "error": "No se pudo conectar con NVIDIA: [Errno 8] nodename nor servname provided, or not known"}
+{"generated_at": 1781517767.715821, "reference": "2025-0055", "status": "error", "duration_seconds": 0.017, "error": "No se pudo conectar con NVIDIA: [Errno 8] nodename nor servname provided, or not known"}
+{"generated_at": 1781517769.827719, "reference": "2025-0054", "status": "error", "duration_seconds": 0.074, "error": "No se pudo conectar con NVIDIA: [Errno 8] nodename nor servname provided, or not known"}
+{"generated_at": 1781517771.881196, "reference": "2025-0053", "status": "error", "duration_seconds": 0.049, "error": "No se pudo conectar con NVIDIA: [Errno 8] nodename nor servname provided, or not known"}
+{"generated_at": 1781517773.903968, "reference": "2025-0052", "status": "error", "duration_seconds": 0.017, "error": "No se pudo conectar con NVIDIA: [Errno 8] nodename nor servname provided, or not known"}
+{"generated_at": 1781517775.921598, "reference": "2025-0051", "status": "error", "duration_seconds": 0.014, "error": "No se pudo conectar con NVIDIA: [Errno 8] nodename nor servname provided, or not known"}
+{"generated_at": 1781517777.9494889, "reference": "2025-0050", "status": "error", "duration_seconds": 0.025, "error": "No se pudo conectar con NVIDIA: [Errno 8] nodename nor servname provided, or not known"}
+{"generated_at": 1781517779.9734368, "reference": "2025-0048", "status": "error", "duration_seconds": 0.02, "error": "No se pudo conectar con NVIDIA: [Errno 8] nodename nor servname provided, or not known"}
+{"generated_at": 1781517782.0113962, "reference": "2025-0047", "status": "error", "duration_seconds": 0.033, "error": "No se pudo conectar con NVIDIA: [Errno 8] nodename nor servname provided, or not known"}
+{"generated_at": 1781517784.0371509, "reference": "2025-0046", "status": "error", "duration_seconds": 0.021, "error": "No se pudo conectar con NVIDIA: [Errno 8] nodename nor servname provided, or not known"}
+{"generated_at": 1781517786.062801, "reference": "2025-0045", "status": "error", "duration_seconds": 0.021, "error": "No se pudo conectar con NVIDIA: [Errno 8] nodename nor servname provided, or not known"}
+{"generated_at": 1781517788.089417, "reference": "2025-0044", "status": "error", "duration_seconds": 0.021, "error": "No se pudo conectar con NVIDIA: [Errno 8] nodename nor servname provided, or not known"}
+{"generated_at": 1781517790.107247, "reference": "2025-0043", "status": "error", "duration_seconds": 0.016, "error": "No se pudo conectar con NVIDIA: [Errno 8] nodename nor servname provided, or not known"}
+{"generated_at": 1781517792.121123, "reference": "2025-0042", "status": "error", "duration_seconds": 0.01, "error": "No se pudo conectar con NVIDIA: [Errno 8] nodename nor servname provided, or not known"}
+{"generated_at": 1781517794.14785, "reference": "2025-0041", "status": "error", "duration_seconds": 0.022, "error": "No se pudo conectar con NVIDIA: [Errno 8] nodename nor servname provided, or not known"}
+{"generated_at": 1781517796.1901052, "reference": "2025-0040", "status": "error", "duration_seconds": 0.038, "error": "No se pudo conectar con NVIDIA: [Errno 8] nodename nor servname provided, or not known"}
+{"generated_at": 1781517798.227104, "reference": "2025-0039", "status": "error", "duration_seconds": 0.017, "error": "No se pudo conectar con NVIDIA: [Errno 8] nodename nor servname provided, or not known"}
+{"generated_at": 1781517800.2512, "reference": "2025-0038", "status": "error", "duration_seconds": 0.022, "error": "No se pudo conectar con NVIDIA: [Errno 8] nodename nor servname provided, or not known"}
+{"generated_at": 1781517802.269124, "reference": "2025-0037", "status": "error", "duration_seconds": 0.014, "error": "No se pudo conectar con NVIDIA: [Errno 8] nodename nor servname provided, or not known"}
+{"generated_at": 1781517804.28621, "reference": "2025-0036", "status": "error", "duration_seconds": 0.013, "error": "No se pudo conectar con NVIDIA: [Errno 8] nodename nor servname provided, or not known"}
+{"generated_at": 1781517806.308927, "reference": "2025-0035", "status": "error", "duration_seconds": 0.019, "error": "No se pudo conectar con NVIDIA: [Errno 8] nodename nor servname provided, or not known"}
+{"generated_at": 1781519221.437578, "reference": "2025-0065", "status": "ok", "duration_seconds": 30.177}
+{"generated_at": 1781519257.601384, "reference": "2025-0064", "status": "ok", "duration_seconds": 34.159}
+{"generated_at": 1781519354.459053, "reference": "2025-0063", "status": "ok", "duration_seconds": 94.854}
+{"generated_at": 1781519385.6286552, "reference": "2025-0062", "status": "ok", "duration_seconds": 29.167}
+{"generated_at": 1781519408.0683231, "reference": "2025-0061", "status": "ok", "duration_seconds": 20.436}
+{"generated_at": 1781519532.677669, "reference": "2025-0060", "status": "ok", "duration_seconds": 122.604}
+{"generated_at": 1781519551.980315, "reference": "2025-0059", "status": "ok", "duration_seconds": 17.298}
+{"generated_at": 1781519623.653118, "reference": "2025-0058", "status": "ok", "duration_seconds": 69.668}
+{"generated_at": 1781519643.7123368, "reference": "2025-0057", "status": "ok", "duration_seconds": 18.054}
+{"generated_at": 1781519658.615239, "reference": "2025-0056", "status": "ok", "duration_seconds": 12.9}
+{"generated_at": 1781519688.182801, "reference": "2025-0055", "status": "ok", "duration_seconds": 27.563}
+{"generated_at": 1781519717.727981, "reference": "2025-0054", "status": "ok", "duration_seconds": 27.54}
+{"generated_at": 1781519756.055849, "reference": "2025-0053", "status": "ok", "duration_seconds": 36.323}
+{"generated_at": 1781519864.2364302, "reference": "2025-0052", "status": "ok", "duration_seconds": 106.177}
+{"generated_at": 1781519890.880542, "reference": "2025-0051", "status": "ok", "duration_seconds": 24.641}
+{"generated_at": 1781519952.0276291, "reference": "2025-0050", "status": "ok", "duration_seconds": 59.143}
+{"generated_at": 1781519974.756907, "reference": "2025-0048", "status": "ok", "duration_seconds": 20.725}
+{"generated_at": 1781520039.468392, "reference": "2025-0047", "status": "ok", "duration_seconds": 62.707}
+{"generated_at": 1781520065.380527, "reference": "2025-0046", "status": "ok", "duration_seconds": 23.907}
+{"generated_at": 1781520094.0309608, "reference": "2025-0045", "status": "ok", "duration_seconds": 26.645}
+{"generated_at": 1781520208.145319, "reference": "2025-0044", "status": "ok", "duration_seconds": 112.11}
+{"generated_at": 1781520254.587376, "reference": "2025-0043", "status": "ok", "duration_seconds": 44.439}
+{"generated_at": 1781520269.7032099, "reference": "2025-0042", "status": "ok", "duration_seconds": 13.112}
+{"generated_at": 1781520291.6524339, "reference": "2025-0041", "status": "ok", "duration_seconds": 19.944}
+{"generated_at": 1781520328.9974232, "reference": "2025-0040", "status": "ok", "duration_seconds": 35.34}
+{"generated_at": 1781521467.7765272, "reference": "2025-0039", "status": "error", "duration_seconds": 5.154, "error": "No se pudo conectar con NVIDIA: [Errno 8] nodename nor servname provided, or not known"}
+{"generated_at": 1781521469.810345, "reference": "2025-0038", "status": "error", "duration_seconds": 0.029, "error": "No se pudo conectar con NVIDIA: [Errno 8] nodename nor servname provided, or not known"}
+{"generated_at": 1781521471.833194, "reference": "2025-0037", "status": "error", "duration_seconds": 0.018, "error": "No se pudo conectar con NVIDIA: [Errno 8] nodename nor servname provided, or not known"}
+{"generated_at": 1781521473.862946, "reference": "2025-0036", "status": "error", "duration_seconds": 0.025, "error": "No se pudo conectar con NVIDIA: [Errno 8] nodename nor servname provided, or not known"}
+{"generated_at": 1781521475.898773, "reference": "2025-0035", "status": "error", "duration_seconds": 0.034, "error": "No se pudo conectar con NVIDIA: [Errno 8] nodename nor servname provided, or not known"}
+{"generated_at": 1781521477.932611, "reference": "2025-0034", "status": "error", "duration_seconds": 0.03, "error": "No se pudo conectar con NVIDIA: [Errno 8] nodename nor servname provided, or not known"}
+{"generated_at": 1781521479.999601, "reference": "2025-0033", "status": "error", "duration_seconds": 0.053, "error": "No se pudo conectar con NVIDIA: [Errno 8] nodename nor servname provided, or not known"}
+{"generated_at": 1781521482.032793, "reference": "2025-0032", "status": "error", "duration_seconds": 0.033, "error": "No se pudo conectar con NVIDIA: [Errno 8] nodename nor servname provided, or not known"}
+{"generated_at": 1781521484.080417, "reference": "2025-0031", "status": "error", "duration_seconds": 0.047, "error": "No se pudo conectar con NVIDIA: [Errno 8] nodename nor servname provided, or not known"}
+{"generated_at": 1781521486.11137, "reference": "2025-0030", "status": "error", "duration_seconds": 0.027, "error": "No se pudo conectar con NVIDIA: [Errno 8] nodename nor servname provided, or not known"}
+{"generated_at": 1781521488.147393, "reference": "2025-0029", "status": "error", "duration_seconds": 0.031, "error": "No se pudo conectar con NVIDIA: [Errno 8] nodename nor servname provided, or not known"}
+{"generated_at": 1781521490.226006, "reference": "2025-0028", "status": "error", "duration_seconds": 0.076, "error": "No se pudo conectar con NVIDIA: [Errno 8] nodename nor servname provided, or not known"}
+{"generated_at": 1781521492.266464, "reference": "2025-0027", "status": "error", "duration_seconds": 0.038, "error": "No se pudo conectar con NVIDIA: [Errno 8] nodename nor servname provided, or not known"}
+{"generated_at": 1781521494.286638, "reference": "2025-0026", "status": "error", "duration_seconds": 0.015, "error": "No se pudo conectar con NVIDIA: [Errno 8] nodename nor servname provided, or not known"}
+{"generated_at": 1781521496.3088572, "reference": "2025-0025", "status": "error", "duration_seconds": 0.02, "error": "No se pudo conectar con NVIDIA: [Errno 8] nodename nor servname provided, or not known"}
+{"generated_at": 1781521498.3289769, "reference": "2025-0024", "status": "error", "duration_seconds": 0.016, "error": "No se pudo conectar con NVIDIA: [Errno 8] nodename nor servname provided, or not known"}
+{"generated_at": 1781521500.35963, "reference": "2025-0023", "status": "error", "duration_seconds": 0.027, "error": "No se pudo conectar con NVIDIA: [Errno 8] nodename nor servname provided, or not known"}
+{"generated_at": 1781521502.3861399, "reference": "2025-0022", "status": "error", "duration_seconds": 0.021, "error": "No se pudo conectar con NVIDIA: [Errno 8] nodename nor servname provided, or not known"}
+{"generated_at": 1781521504.4236789, "reference": "2025-0021", "status": "error", "duration_seconds": 0.032, "error": "No se pudo conectar con NVIDIA: [Errno 8] nodename nor servname provided, or not known"}
+{"generated_at": 1781521506.449538, "reference": "2025-0020", "status": "error", "duration_seconds": 0.021, "error": "No se pudo conectar con NVIDIA: [Errno 8] nodename nor servname provided, or not known"}
+{"generated_at": 1781521508.46987, "reference": "2025-0019", "status": "error", "duration_seconds": 0.016, "error": "No se pudo conectar con NVIDIA: [Errno 8] nodename nor servname provided, or not known"}
+{"generated_at": 1781521510.528296, "reference": "2025-0018", "status": "error", "duration_seconds": 0.039, "error": "No se pudo conectar con NVIDIA: [Errno 8] nodename nor servname provided, or not known"}
+{"generated_at": 1781521512.547235, "reference": "2025-0017", "status": "error", "duration_seconds": 0.014, "error": "No se pudo conectar con NVIDIA: [Errno 8] nodename nor servname provided, or not known"}
+{"generated_at": 1781521514.6047401, "reference": "2025-0016", "status": "error", "duration_seconds": 0.053, "error": "No se pudo conectar con NVIDIA: [Errno 8] nodename nor servname provided, or not known"}
+{"generated_at": 1781521516.6295009, "reference": "2025-0015", "status": "error", "duration_seconds": 0.019, "error": "No se pudo conectar con NVIDIA: [Errno 8] nodename nor servname provided, or not known"}
+{"generated_at": 1781521518.6489651, "reference": "2025-0014", "status": "error", "duration_seconds": 0.015, "error": "No se pudo conectar con NVIDIA: [Errno 8] nodename nor servname provided, or not known"}
+{"generated_at": 1781521520.673701, "reference": "2025-0013", "status": "error", "duration_seconds": 0.022, "error": "No se pudo conectar con NVIDIA: [Errno 8] nodename nor servname provided, or not known"}
+{"generated_at": 1781521522.6845922, "reference": "2025-0012", "status": "error", "duration_seconds": 0.006, "error": "No se pudo conectar con NVIDIA: [Errno 8] nodename nor servname provided, or not known"}
+{"generated_at": 1781521524.702712, "reference": "2025-0011", "status": "error", "duration_seconds": 0.013, "error": "No se pudo conectar con NVIDIA: [Errno 8] nodename nor servname provided, or not known"}
+{"generated_at": 1781521526.7345679, "reference": "2025-0010", "status": "error", "duration_seconds": 0.027, "error": "No se pudo conectar con NVIDIA: [Errno 8] nodename nor servname provided, or not known"}
+{"generated_at": 1781521853.072293, "reference": "2025-0039", "status": "error", "duration_seconds": 0.627, "error": "No se pudo conectar con NVIDIA: curl: (6) Could not resolve host: integrate.api.nvidia.com"}
+{"generated_at": 1781521855.111763, "reference": "2025-0038", "status": "error", "duration_seconds": 0.037, "error": "No se pudo conectar con NVIDIA: curl: (6) Could not resolve host: integrate.api.nvidia.com"}
+{"generated_at": 1781521857.144365, "reference": "2025-0037", "status": "error", "duration_seconds": 0.027, "error": "No se pudo conectar con NVIDIA: curl: (6) Could not resolve host: integrate.api.nvidia.com"}
+{"generated_at": 1781521859.18383, "reference": "2025-0036", "status": "error", "duration_seconds": 0.034, "error": "No se pudo conectar con NVIDIA: curl: (6) Could not resolve host: integrate.api.nvidia.com"}
+{"generated_at": 1781521861.2263198, "reference": "2025-0035", "status": "error", "duration_seconds": 0.039, "error": "No se pudo conectar con NVIDIA: curl: (6) Could not resolve host: integrate.api.nvidia.com"}
+{"generated_at": 1781521863.267921, "reference": "2025-0034", "status": "error", "duration_seconds": 0.036, "error": "No se pudo conectar con NVIDIA: curl: (6) Could not resolve host: integrate.api.nvidia.com"}
+{"generated_at": 1781521865.3104398, "reference": "2025-0033", "status": "error", "duration_seconds": 0.037, "error": "No se pudo conectar con NVIDIA: curl: (6) Could not resolve host: integrate.api.nvidia.com"}
+{"generated_at": 1781521867.346266, "reference": "2025-0032", "status": "error", "duration_seconds": 0.029, "error": "No se pudo conectar con NVIDIA: curl: (6) Could not resolve host: integrate.api.nvidia.com"}
+{"generated_at": 1781521869.388521, "reference": "2025-0031", "status": "error", "duration_seconds": 0.037, "error": "No se pudo conectar con NVIDIA: curl: (6) Could not resolve host: integrate.api.nvidia.com"}
+{"generated_at": 1781521871.434044, "reference": "2025-0030", "status": "error", "duration_seconds": 0.041, "error": "No se pudo conectar con NVIDIA: curl: (6) Could not resolve host: integrate.api.nvidia.com"}
+{"generated_at": 1781521873.47021, "reference": "2025-0029", "status": "error", "duration_seconds": 0.032, "error": "No se pudo conectar con NVIDIA: curl: (6) Could not resolve host: integrate.api.nvidia.com"}
+{"generated_at": 1781521875.524298, "reference": "2025-0028", "status": "error", "duration_seconds": 0.049, "error": "No se pudo conectar con NVIDIA: curl: (6) Could not resolve host: integrate.api.nvidia.com"}
+{"generated_at": 1781521877.569847, "reference": "2025-0027", "status": "error", "duration_seconds": 0.041, "error": "No se pudo conectar con NVIDIA: curl: (6) Could not resolve host: integrate.api.nvidia.com"}
+{"generated_at": 1781521879.598867, "reference": "2025-0026", "status": "error", "duration_seconds": 0.026, "error": "No se pudo conectar con NVIDIA: curl: (6) Could not resolve host: integrate.api.nvidia.com"}
+{"generated_at": 1781521881.638119, "reference": "2025-0025", "status": "error", "duration_seconds": 0.035, "error": "No se pudo conectar con NVIDIA: curl: (6) Could not resolve host: integrate.api.nvidia.com"}
+{"generated_at": 1781521883.67554, "reference": "2025-0024", "status": "error", "duration_seconds": 0.032, "error": "No se pudo conectar con NVIDIA: curl: (6) Could not resolve host: integrate.api.nvidia.com"}
+{"generated_at": 1781521885.71927, "reference": "2025-0023", "status": "error", "duration_seconds": 0.038, "error": "No se pudo conectar con NVIDIA: curl: (6) Could not resolve host: integrate.api.nvidia.com"}
+{"generated_at": 1781521887.759787, "reference": "2025-0022", "status": "error", "duration_seconds": 0.036, "error": "No se pudo conectar con NVIDIA: curl: (6) Could not resolve host: integrate.api.nvidia.com"}
+{"generated_at": 1781521889.805216, "reference": "2025-0021", "status": "error", "duration_seconds": 0.041, "error": "No se pudo conectar con NVIDIA: curl: (6) Could not resolve host: integrate.api.nvidia.com"}
+{"generated_at": 1781521891.971009, "reference": "2025-0020", "status": "error", "duration_seconds": 0.164, "error": "No se pudo conectar con NVIDIA: curl: (6) Could not resolve host: integrate.api.nvidia.com"}
+{"generated_at": 1781521893.999722, "reference": "2025-0019", "status": "error", "duration_seconds": 0.026, "error": "No se pudo conectar con NVIDIA: curl: (6) Could not resolve host: integrate.api.nvidia.com"}
+{"generated_at": 1781521896.040334, "reference": "2025-0018", "status": "error", "duration_seconds": 0.035, "error": "No se pudo conectar con NVIDIA: curl: (6) Could not resolve host: integrate.api.nvidia.com"}
+{"generated_at": 1781521898.076221, "reference": "2025-0017", "status": "error", "duration_seconds": 0.031, "error": "No se pudo conectar con NVIDIA: curl: (6) Could not resolve host: integrate.api.nvidia.com"}
+{"generated_at": 1781521900.1141078, "reference": "2025-0016", "status": "error", "duration_seconds": 0.033, "error": "No se pudo conectar con NVIDIA: curl: (6) Could not resolve host: integrate.api.nvidia.com"}
+{"generated_at": 1781521902.15043, "reference": "2025-0015", "status": "error", "duration_seconds": 0.031, "error": "No se pudo conectar con NVIDIA: curl: (6) Could not resolve host: integrate.api.nvidia.com"}
+{"generated_at": 1781521904.181678, "reference": "2025-0014", "status": "error", "duration_seconds": 0.027, "error": "No se pudo conectar con NVIDIA: curl: (6) Could not resolve host: integrate.api.nvidia.com"}
+{"generated_at": 1781521906.268179, "reference": "2025-0013", "status": "error", "duration_seconds": 0.081, "error": "No se pudo conectar con NVIDIA: curl: (6) Could not resolve host: integrate.api.nvidia.com"}
+{"generated_at": 1781521908.295434, "reference": "2025-0012", "status": "error", "duration_seconds": 0.022, "error": "No se pudo conectar con NVIDIA: curl: (6) Could not resolve host: integrate.api.nvidia.com"}
+{"generated_at": 1781521910.325535, "reference": "2025-0011", "status": "error", "duration_seconds": 0.026, "error": "No se pudo conectar con NVIDIA: curl: (6) Could not resolve host: integrate.api.nvidia.com"}
+{"generated_at": 1781521912.391147, "reference": "2025-0010", "status": "error", "duration_seconds": 0.06, "error": "No se pudo conectar con NVIDIA: curl: (6) Could not resolve host: integrate.api.nvidia.com"}
+{"generated_at": 1781522065.869845, "reference": "2025-0039", "status": "ok", "duration_seconds": 46.907}
+{"generated_at": 1781522254.41429, "reference": "2025-0038", "status": "ok", "duration_seconds": 186.539}
+{"generated_at": 1781522398.442774, "reference": "2025-0037", "status": "ok", "duration_seconds": 142.023}
+{"generated_at": 1781522401.404738, "reference": "2025-0036", "status": "error", "duration_seconds": 0.957, "error": "NVIDIA API devolvio HTTP 502. Upstream request failed."}
+{"generated_at": 1781522531.192745, "reference": "2025-0035", "status": "ok", "duration_seconds": 127.784}
+{"generated_at": 1781522581.806459, "reference": "2025-0034", "status": "ok", "duration_seconds": 48.609}
+{"generated_at": 1781522769.500602, "reference": "2025-0033", "status": "ok", "duration_seconds": 185.689}
+{"generated_at": 1781522797.139161, "reference": "2025-0032", "status": "ok", "duration_seconds": 25.634}
+{"generated_at": 1781523004.939595, "reference": "2025-0031", "status": "ok", "duration_seconds": 205.796}
+{"generated_at": 1781524325.302664, "reference": "2025-0036", "status": "error", "duration_seconds": 0.598, "error": "No se pudo conectar con NVIDIA: curl: (6) Could not resolve host: integrate.api.nvidia.com"}
+{"generated_at": 1781524327.336766, "reference": "2025-0030", "status": "error", "duration_seconds": 0.033, "error": "No se pudo conectar con NVIDIA: curl: (6) Could not resolve host: integrate.api.nvidia.com"}
+{"generated_at": 1781524329.3709152, "reference": "2025-0029", "status": "error", "duration_seconds": 0.031, "error": "No se pudo conectar con NVIDIA: curl: (6) Could not resolve host: integrate.api.nvidia.com"}
+{"generated_at": 1781524331.416013, "reference": "2025-0028", "status": "error", "duration_seconds": 0.044, "error": "No se pudo conectar con NVIDIA: curl: (6) Could not resolve host: integrate.api.nvidia.com"}
+{"generated_at": 1781524333.452301, "reference": "2025-0027", "status": "error", "duration_seconds": 0.032, "error": "No se pudo conectar con NVIDIA: curl: (6) Could not resolve host: integrate.api.nvidia.com"}
+{"generated_at": 1781524335.4773529, "reference": "2025-0026", "status": "error", "duration_seconds": 0.024, "error": "No se pudo conectar con NVIDIA: curl: (6) Could not resolve host: integrate.api.nvidia.com"}
+{"generated_at": 1781524337.513428, "reference": "2025-0025", "status": "error", "duration_seconds": 0.035, "error": "No se pudo conectar con NVIDIA: curl: (6) Could not resolve host: integrate.api.nvidia.com"}
+{"generated_at": 1781524339.5588129, "reference": "2025-0024", "status": "error", "duration_seconds": 0.041, "error": "No se pudo conectar con NVIDIA: curl: (6) Could not resolve host: integrate.api.nvidia.com"}
+{"generated_at": 1781524341.595986, "reference": "2025-0023", "status": "error", "duration_seconds": 0.037, "error": "No se pudo conectar con NVIDIA: curl: (6) Could not resolve host: integrate.api.nvidia.com"}
+{"generated_at": 1781524343.628822, "reference": "2025-0022", "status": "error", "duration_seconds": 0.031, "error": "No se pudo conectar con NVIDIA: curl: (6) Could not resolve host: integrate.api.nvidia.com"}
+{"generated_at": 1781524345.668789, "reference": "2025-0021", "status": "error", "duration_seconds": 0.038, "error": "No se pudo conectar con NVIDIA: curl: (6) Could not resolve host: integrate.api.nvidia.com"}
+{"generated_at": 1781524347.7066529, "reference": "2025-0020", "status": "error", "duration_seconds": 0.034, "error": "No se pudo conectar con NVIDIA: curl: (6) Could not resolve host: integrate.api.nvidia.com"}
+{"generated_at": 1781524349.788687, "reference": "2025-0019", "status": "error", "duration_seconds": 0.059, "error": "No se pudo conectar con NVIDIA: curl: (6) Could not resolve host: integrate.api.nvidia.com"}
+{"generated_at": 1781524351.833258, "reference": "2025-0018", "status": "error", "duration_seconds": 0.041, "error": "No se pudo conectar con NVIDIA: curl: (6) Could not resolve host: integrate.api.nvidia.com"}
+{"generated_at": 1781524353.865576, "reference": "2025-0017", "status": "error", "duration_seconds": 0.03, "error": "No se pudo conectar con NVIDIA: curl: (6) Could not resolve host: integrate.api.nvidia.com"}
+{"generated_at": 1781524355.901741, "reference": "2025-0016", "status": "error", "duration_seconds": 0.032, "error": "No se pudo conectar con NVIDIA: curl: (6) Could not resolve host: integrate.api.nvidia.com"}
+{"generated_at": 1781524357.986795, "reference": "2025-0015", "status": "error", "duration_seconds": 0.081, "error": "No se pudo conectar con NVIDIA: curl: (6) Could not resolve host: integrate.api.nvidia.com"}
+{"generated_at": 1781524360.0240881, "reference": "2025-0014", "status": "error", "duration_seconds": 0.033, "error": "No se pudo conectar con NVIDIA: curl: (6) Could not resolve host: integrate.api.nvidia.com"}
+{"generated_at": 1781524362.063266, "reference": "2025-0013", "status": "error", "duration_seconds": 0.037, "error": "No se pudo conectar con NVIDIA: curl: (6) Could not resolve host: integrate.api.nvidia.com"}
+{"generated_at": 1781524364.0966651, "reference": "2025-0012", "status": "error", "duration_seconds": 0.027, "error": "No se pudo conectar con NVIDIA: curl: (6) Could not resolve host: integrate.api.nvidia.com"}
+{"generated_at": 1781524366.1245298, "reference": "2025-0011", "status": "error", "duration_seconds": 0.027, "error": "No se pudo conectar con NVIDIA: curl: (6) Could not resolve host: integrate.api.nvidia.com"}
+{"generated_at": 1781524368.1718771, "reference": "2025-0010", "status": "error", "duration_seconds": 0.042, "error": "No se pudo conectar con NVIDIA: curl: (6) Could not resolve host: integrate.api.nvidia.com"}
+{"generated_at": 1781524370.252007, "reference": "2025-0009", "status": "error", "duration_seconds": 0.076, "error": "No se pudo conectar con NVIDIA: curl: (6) Could not resolve host: integrate.api.nvidia.com"}
+{"generated_at": 1781524372.28872, "reference": "2025-0008", "status": "error", "duration_seconds": 0.036, "error": "No se pudo conectar con NVIDIA: curl: (6) Could not resolve host: integrate.api.nvidia.com"}
+{"generated_at": 1781524374.3725178, "reference": "2025-0007", "status": "error", "duration_seconds": 0.083, "error": "No se pudo conectar con NVIDIA: curl: (6) Could not resolve host: integrate.api.nvidia.com"}
+{"generated_at": 1781524376.409059, "reference": "2025-0006", "status": "error", "duration_seconds": 0.034, "error": "No se pudo conectar con NVIDIA: curl: (6) Could not resolve host: integrate.api.nvidia.com"}
+{"generated_at": 1781524378.49044, "reference": "2025-0005", "status": "error", "duration_seconds": 0.078, "error": "No se pudo conectar con NVIDIA: curl: (6) Could not resolve host: integrate.api.nvidia.com"}
+{"generated_at": 1781524380.537139, "reference": "2025-0004", "status": "error", "duration_seconds": 0.041, "error": "No se pudo conectar con NVIDIA: curl: (6) Could not resolve host: integrate.api.nvidia.com"}
+{"generated_at": 1781524382.582886, "reference": "2025-0003", "status": "error", "duration_seconds": 0.045, "error": "No se pudo conectar con NVIDIA: curl: (6) Could not resolve host: integrate.api.nvidia.com"}
+{"generated_at": 1781524384.643671, "reference": "2025-0002", "status": "error", "duration_seconds": 0.056, "error": "No se pudo conectar con NVIDIA: curl: (6) Could not resolve host: integrate.api.nvidia.com"}
+{"generated_at": 1781524439.53407, "reference": "2025-0036", "status": "error", "duration_seconds": 0.665, "error": "No se pudo conectar con NVIDIA: curl: (6) Could not resolve host: integrate.api.nvidia.com"}
+{"generated_at": 1781524441.5889149, "reference": "2025-0030", "status": "error", "duration_seconds": 0.049, "error": "No se pudo conectar con NVIDIA: curl: (6) Could not resolve host: integrate.api.nvidia.com"}
+{"generated_at": 1781524443.684142, "reference": "2025-0029", "status": "error", "duration_seconds": 0.091, "error": "No se pudo conectar con NVIDIA: curl: (6) Could not resolve host: integrate.api.nvidia.com"}
+{"generated_at": 1781524445.786361, "reference": "2025-0028", "status": "error", "duration_seconds": 0.098, "error": "No se pudo conectar con NVIDIA: curl: (6) Could not resolve host: integrate.api.nvidia.com"}
+{"generated_at": 1781524447.827147, "reference": "2025-0027", "status": "error", "duration_seconds": 0.036, "error": "No se pudo conectar con NVIDIA: curl: (6) Could not resolve host: integrate.api.nvidia.com"}
+{"generated_at": 1781524449.853002, "reference": "2025-0026", "status": "error", "duration_seconds": 0.025, "error": "No se pudo conectar con NVIDIA: curl: (6) Could not resolve host: integrate.api.nvidia.com"}
+{"generated_at": 1781524451.9349399, "reference": "2025-0025", "status": "error", "duration_seconds": 0.076, "error": "No se pudo conectar con NVIDIA: curl: (6) Could not resolve host: integrate.api.nvidia.com"}
+{"generated_at": 1781524453.969159, "reference": "2025-0024", "status": "error", "duration_seconds": 0.031, "error": "No se pudo conectar con NVIDIA: curl: (6) Could not resolve host: integrate.api.nvidia.com"}
+{"generated_at": 1781524456.083296, "reference": "2025-0023", "status": "error", "duration_seconds": 0.109, "error": "No se pudo conectar con NVIDIA: curl: (6) Could not resolve host: integrate.api.nvidia.com"}
+{"generated_at": 1781524458.16785, "reference": "2025-0022", "status": "error", "duration_seconds": 0.08, "error": "No se pudo conectar con NVIDIA: curl: (6) Could not resolve host: integrate.api.nvidia.com"}
+{"generated_at": 1781524460.2254379, "reference": "2025-0021", "status": "error", "duration_seconds": 0.055, "error": "No se pudo conectar con NVIDIA: curl: (6) Could not resolve host: integrate.api.nvidia.com"}
+{"generated_at": 1781524462.309254, "reference": "2025-0020", "status": "error", "duration_seconds": 0.074, "error": "No se pudo conectar con NVIDIA: curl: (6) Could not resolve host: integrate.api.nvidia.com"}
+{"generated_at": 1781524464.349951, "reference": "2025-0019", "status": "error", "duration_seconds": 0.036, "error": "No se pudo conectar con NVIDIA: curl: (6) Could not resolve host: integrate.api.nvidia.com"}
+{"generated_at": 1781524466.536535, "reference": "2025-0018", "status": "error", "duration_seconds": 0.186, "error": "No se pudo conectar con NVIDIA: curl: (6) Could not resolve host: integrate.api.nvidia.com"}
+{"generated_at": 1781524468.5846112, "reference": "2025-0017", "status": "error", "duration_seconds": 0.043, "error": "No se pudo conectar con NVIDIA: curl: (6) Could not resolve host: integrate.api.nvidia.com"}
+{"generated_at": 1781524470.629587, "reference": "2025-0016", "status": "error", "duration_seconds": 0.041, "error": "No se pudo conectar con NVIDIA: curl: (6) Could not resolve host: integrate.api.nvidia.com"}
+{"generated_at": 1781524472.67929, "reference": "2025-0015", "status": "error", "duration_seconds": 0.045, "error": "No se pudo conectar con NVIDIA: curl: (6) Could not resolve host: integrate.api.nvidia.com"}
+{"generated_at": 1781524474.805181, "reference": "2025-0014", "status": "error", "duration_seconds": 0.122, "error": "No se pudo conectar con NVIDIA: curl: (6) Could not resolve host: integrate.api.nvidia.com"}
+{"generated_at": 1781524476.846563, "reference": "2025-0013", "status": "error", "duration_seconds": 0.04, "error": "No se pudo conectar con NVIDIA: curl: (6) Could not resolve host: integrate.api.nvidia.com"}
+{"generated_at": 1781524478.8725262, "reference": "2025-0012", "status": "error", "duration_seconds": 0.021, "error": "No se pudo conectar con NVIDIA: curl: (6) Could not resolve host: integrate.api.nvidia.com"}
+{"generated_at": 1781524480.898925, "reference": "2025-0011", "status": "error", "duration_seconds": 0.025, "error": "No se pudo conectar con NVIDIA: curl: (6) Could not resolve host: integrate.api.nvidia.com"}
+{"generated_at": 1781524482.941833, "reference": "2025-0010", "status": "error", "duration_seconds": 0.037, "error": "No se pudo conectar con NVIDIA: curl: (6) Could not resolve host: integrate.api.nvidia.com"}
+{"generated_at": 1781524484.984886, "reference": "2025-0009", "status": "error", "duration_seconds": 0.04, "error": "No se pudo conectar con NVIDIA: curl: (6) Could not resolve host: integrate.api.nvidia.com"}
+{"generated_at": 1781524487.0137331, "reference": "2025-0008", "status": "error", "duration_seconds": 0.026, "error": "No se pudo conectar con NVIDIA: curl: (6) Could not resolve host: integrate.api.nvidia.com"}
+{"generated_at": 1781524489.063711, "reference": "2025-0007", "status": "error", "duration_seconds": 0.046, "error": "No se pudo conectar con NVIDIA: curl: (6) Could not resolve host: integrate.api.nvidia.com"}
+{"generated_at": 1781524491.085769, "reference": "2025-0006", "status": "error", "duration_seconds": 0.021, "error": "No se pudo conectar con NVIDIA: curl: (6) Could not resolve host: integrate.api.nvidia.com"}
+{"generated_at": 1781524493.115212, "reference": "2025-0005", "status": "error", "duration_seconds": 0.027, "error": "No se pudo conectar con NVIDIA: curl: (6) Could not resolve host: integrate.api.nvidia.com"}
+{"generated_at": 1781524495.1516721, "reference": "2025-0004", "status": "error", "duration_seconds": 0.032, "error": "No se pudo conectar con NVIDIA: curl: (6) Could not resolve host: integrate.api.nvidia.com"}
+{"generated_at": 1781524497.180683, "reference": "2025-0003", "status": "error", "duration_seconds": 0.025, "error": "No se pudo conectar con NVIDIA: curl: (6) Could not resolve host: integrate.api.nvidia.com"}
+{"generated_at": 1781524499.259823, "reference": "2025-0002", "status": "error", "duration_seconds": 0.078, "error": "No se pudo conectar con NVIDIA: curl: (6) Could not resolve host: integrate.api.nvidia.com"}
+{"generated_at": 1781524715.265449, "reference": "2025-0036", "status": "error", "duration_seconds": 0.568, "error": "No se pudo resolver el host de NVIDIA (integrate.api.nvidia.com). Revisa NVIDIA_CHAT_COMPLETIONS_URL, NVIDIA_API_BASE_URL o la conectividad DNS."}
+{"generated_at": 1781524768.825289, "reference": "2025-0036", "status": "error", "duration_seconds": 0.616, "error": "No se pudo conectar con NVIDIA: curl: (6) Could not resolve host: integrate.api.nvidia.com"}
+{"generated_at": 1781524864.842616, "reference": "2025-0036", "status": "timeout", "duration_seconds": 30.832, "error": "La solicitud a NVIDIA excedio el tiempo de espera."}

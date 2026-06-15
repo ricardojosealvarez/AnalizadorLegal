@@ -20,7 +20,7 @@ El corpus PDF se mantiene fuera de este repositorio y se lee por defecto desde:
   - senales de cambio doctrinal
 - Muestra evolucion anual, temas frecuentes, temas escasos y fichas por informe.
 - Muestra resumen cacheado de cada dictamen, puntos principales y conclusiones.
-- Puede mejorar los resumenes con OpenAI y conservarlos en SQLite para no repetir costes.
+- Puede mejorar los resumenes con NVIDIA y conservarlos en SQLite para no repetir costes.
 - Pagina los resultados de busqueda.
 
 ## Datos incluidos para despliegue
@@ -42,16 +42,35 @@ Nota: los PDFs completos originales no se incluyen en este repositorio por taman
 /Users/ricardo/.cache/codex-runtimes/codex-primary-runtime/dependencies/python/bin/python3 -m legal_analyzer summarize
 /Users/ricardo/.cache/codex-runtimes/codex-primary-runtime/dependencies/python/bin/python3 -m legal_analyzer summarize-llm --limit 5
 /Users/ricardo/.cache/codex-runtimes/codex-primary-runtime/dependencies/python/bin/python3 -m legal_analyzer summarize-nvidia --limit 5
+/Users/ricardo/.cache/codex-runtimes/codex-primary-runtime/dependencies/python/bin/python3 -m legal_analyzer summarize-nvidia-auto --max-attempts 12 --max-successes 6
 /Users/ricardo/.cache/codex-runtimes/codex-primary-runtime/dependencies/python/bin/python3 -m legal_analyzer serve --port 8000
 ```
 
-La capa LLM usa `OPENAI_API_KEY` desde el entorno o desde `.env.local`. El modelo
-puede configurarse con `OPENAI_SUMMARY_MODEL`; por defecto se usa `gpt-5.4-mini`.
-Los resumenes se generan con fragmentos juridicamente relevantes y solo
-reemplazan la version anterior cuando la llamada finaliza correctamente.
+La capa LLM principal usa `NVIDIA_API_KEY` desde el entorno o desde `.env.local`.
+El modelo puede configurarse con `NVIDIA_SUMMARY_MODEL`; por defecto se usa
+`mistralai/mistral-medium-3.5-128b`. Los resumenes se generan con fragmentos
+juridicamente relevantes y solo reemplazan la version anterior cuando la llamada
+finaliza correctamente.
 
-Las pruebas con NVIDIA usan `NVIDIA_API_KEY` y guardan sus resultados en
-`summary_variants`, sin reemplazar el resumen principal de OpenAI.
+El endpoint de NVIDIA puede sobreescribirse con `NVIDIA_CHAT_COMPLETIONS_URL`.
+Si prefieres declarar solo la base, usa `NVIDIA_API_BASE_URL` y la app
+construira `/v1/chat/completions` automaticamente. Si el runtime no logra
+resolver el host o el endpoint esta mal configurado, el lote automatico se
+detiene pronto con un `stop_reason` explicito para evitar decenas de intentos
+inutiles.
+
+Si un informe tenia un resumen principal generado con OpenAI, se conserva como
+variante en `summary_variants` antes de reemplazarlo por NVIDIA, para mantener
+la comparacion historica.
+
+Para automatizar lotes prudentes con NVIDIA, usa `summarize-nvidia-auto`. El
+comando registra cada intento en `data/nvidia_summary_runs.jsonl`, corta tras
+timeouts consecutivos, limita intentos y exitos, y actualiza automaticamente el
+snapshot `data/aepd_reports.sqlite.gz` cuando guarda nuevos resumenes:
+
+```bash
+/Users/ricardo/.cache/codex-runtimes/codex-primary-runtime/dependencies/python/bin/python3 -m legal_analyzer summarize-nvidia-auto --max-attempts 12 --max-successes 6 --timeout 90 --sleep 10 --stop-after-timeouts 2
+```
 
 Despues abre:
 

@@ -11,8 +11,7 @@ from pathlib import Path
 from typing import Any
 
 from .classifier import DOCTRINAL_CHANGE_PATTERNS, classify, normalize
-from .llm_summarizer import LLMSummaryError, summarize_with_openai
-from .nvidia_summarizer import NvidiaSummaryError, summarize_with_nvidia
+from .nvidia_summarizer import NvidiaSummaryError, is_nvidia_connectivity_error, summarize_with_nvidia
 from .pdf_extract import chunk_text, extract_pdf_text, infer_reference_from_name, infer_title, infer_year_from_name
 from .summarizer import summarize_document
 
@@ -529,12 +528,13 @@ def precompute_summaries(db_path: Path, limit: int | None = None, force: bool = 
 def precompute_llm_summaries(db_path: Path, limit: int | None = None, force: bool = False) -> dict[str, Any]:
     with connect(db_path) as con:
         ensure_summary_schema(con)
+        ensure_summary_variants_schema(con)
         query = """
             SELECT d.*
             FROM documents d
             LEFT JOIN summaries s ON s.document_id = d.id
             WHERE d.needs_ocr = 0
-              AND (? OR s.method IS NULL OR s.method NOT LIKE 'openai:%')
+              AND (? OR s.method IS NULL OR s.method NOT LIKE 'nvidia:%')
             ORDER BY d.year DESC, d.reference DESC
         """
         docs = con.execute(query, (1 if force else 0,)).fetchall()
@@ -545,6 +545,7 @@ def precompute_llm_summaries(db_path: Path, limit: int | None = None, force: boo
             "attempted": 0,
             "summarized": 0,
             "failed": 0,
+            "references": [],
             "failures": [],
         }
         for doc in docs:
@@ -557,11 +558,12 @@ def precompute_llm_summaries(db_path: Path, limit: int | None = None, force: boo
             try:
                 create_llm_summary(con, doc, chunks)
                 stats["summarized"] += 1
-            except LLMSummaryError as exc:
+                stats["references"].append(doc["reference"])
+            except NvidiaSummaryError as exc:
                 stats["failed"] += 1
                 stats["failures"].append({"reference": doc["reference"], "error": str(exc)})
                 error_text = str(exc).lower()
-                if "no tiene cuota" in error_text or "clave de openai no es valida" in error_text:
+                if "nvidia_api_key" in error_text or "limite" in error_text or "quota" in error_text:
                     stats["stopped_early"] = True
                     stats["stop_reason"] = str(exc)
                     break
@@ -569,44 +571,99 @@ def precompute_llm_summaries(db_path: Path, limit: int | None = None, force: boo
 
 
 def precompute_nvidia_summaries(db_path: Path, limit: int = 5, force: bool = False) -> dict[str, Any]:
+    return precompute_llm_summaries(db_path, limit=limit, force=force)
+
+
+def precompute_nvidia_summaries_auto(
+    db_path: Path,
+    snapshot_path: Path | None = None,
+    max_attempts: int = 12,
+    max_successes: int = 6,
+    timeout_seconds: int = 90,
+    sleep_seconds: float = 10.0,
+    stop_after_timeouts: int = 2,
+    log_path: Path = Path("data/nvidia_summary_runs.jsonl"),
+    force: bool = False,
+    update_snapshot: bool = True,
+) -> dict[str, Any]:
+    log_path.parent.mkdir(parents=True, exist_ok=True)
+    stats: dict[str, Any] = {
+        "seen": 0,
+        "attempted": 0,
+        "summarized": 0,
+        "failed": 0,
+        "timeouts": 0,
+        "consecutive_timeouts": 0,
+        "references": [],
+        "failures": [],
+        "log_path": str(log_path),
+    }
     with connect(db_path) as con:
         ensure_summary_schema(con)
         ensure_summary_variants_schema(con)
-        query = """
+        candidates = con.execute(
+            """
             SELECT d.*
             FROM documents d
-            JOIN summaries s ON s.document_id = d.id
-            LEFT JOIN summary_variants v
-              ON v.document_id = d.id AND v.provider = 'nvidia'
+            LEFT JOIN summaries s ON s.document_id = d.id
             WHERE d.needs_ocr = 0
-              AND s.method LIKE 'openai:%'
-              AND (? OR v.document_id IS NULL)
+              AND (? OR s.method IS NULL OR s.method NOT LIKE 'nvidia:%')
             ORDER BY d.year DESC, d.reference DESC
             LIMIT ?
-        """
-        docs = con.execute(query, (1 if force else 0, limit)).fetchall()
-        stats: dict[str, Any] = {
-            "seen": len(docs),
-            "summarized": 0,
-            "failed": 0,
-            "references": [],
-            "failures": [],
-        }
-        for doc in docs:
+            """,
+            (1 if force else 0, max_attempts),
+        ).fetchall()
+        stats["seen"] = len(candidates)
+        for doc in candidates:
+            if stats["attempted"] >= max_attempts or stats["summarized"] >= max_successes:
+                break
+            stats["attempted"] += 1
+            started_at = time.time()
             chunks = rows(
                 con,
                 "SELECT chunk_index, text FROM chunks WHERE document_id = ? ORDER BY chunk_index",
                 [doc["id"]],
             )
             try:
-                summary = summarize_with_nvidia(select_key_chunks(chunks, limit=7), dict(doc))
-                save_summary_variant(con, doc["id"], summary)
+                create_llm_summary(con, doc, chunks, timeout_seconds=timeout_seconds)
+                duration = time.time() - started_at
                 stats["summarized"] += 1
+                stats["consecutive_timeouts"] = 0
                 stats["references"].append(doc["reference"])
+                append_nvidia_run_log(log_path, doc["reference"], "ok", duration)
             except NvidiaSummaryError as exc:
+                duration = time.time() - started_at
+                error = str(exc)
+                is_timeout = "excedio el tiempo de espera" in error.lower()
                 stats["failed"] += 1
-                stats["failures"].append({"reference": doc["reference"], "error": str(exc)})
-        return stats
+                stats["failures"].append({"reference": doc["reference"], "error": error})
+                if is_timeout:
+                    stats["timeouts"] += 1
+                    stats["consecutive_timeouts"] += 1
+                else:
+                    stats["consecutive_timeouts"] = 0
+                append_nvidia_run_log(log_path, doc["reference"], "timeout" if is_timeout else "error", duration, error)
+                error_text = error.lower()
+                if "nvidia_api_key" in error_text or "limite" in error_text or "quota" in error_text:
+                    stats["stopped_early"] = True
+                    stats["stop_reason"] = error
+                    break
+                if is_nvidia_connectivity_error(error):
+                    stats["stopped_early"] = True
+                    stats["stop_reason"] = error
+                    break
+                if stats["consecutive_timeouts"] >= stop_after_timeouts:
+                    stats["stopped_early"] = True
+                    stats["stop_reason"] = f"{stop_after_timeouts} timeouts consecutivos"
+                    break
+            if sleep_seconds > 0 and stats["attempted"] < max_attempts and stats["summarized"] < max_successes:
+                time.sleep(sleep_seconds)
+    if update_snapshot and snapshot_path and stats["summarized"]:
+        refresh_database_snapshot(db_path, snapshot_path)
+        stats["snapshot_updated"] = True
+    else:
+        stats["snapshot_updated"] = False
+    return stats
 
 
 def generate_document_llm_summary(db_path: Path, reference: str, force: bool = False) -> dict[str, Any] | None:
@@ -617,7 +674,7 @@ def generate_document_llm_summary(db_path: Path, reference: str, force: bool = F
             return None
         if not force:
             existing = con.execute("SELECT * FROM summaries WHERE document_id = ?", (doc["id"],)).fetchone()
-            if existing and str(existing["method"]).startswith("openai:"):
+            if existing and str(existing["method"]).startswith("nvidia:"):
                 return hydrate_summary(existing)
         chunks = rows(
             con,
@@ -631,7 +688,9 @@ def create_llm_summary(
     con: sqlite3.Connection,
     doc: sqlite3.Row,
     chunks: list[dict[str, Any]],
+    timeout_seconds: int = 180,
 ) -> dict[str, Any]:
+    ensure_summary_variants_schema(con)
     key_chunks = select_key_chunks(chunks, limit=7)
     metadata = {
         "reference": doc["reference"],
@@ -641,8 +700,11 @@ def create_llm_summary(
         "base_legal": doc["base_legal"],
         "regimen": doc["regimen"],
     }
-    summary = summarize_with_openai(key_chunks, metadata)
+    summary = summarize_with_nvidia(key_chunks, metadata, timeout_seconds=timeout_seconds)
     generated_at = time.time()
+    existing = con.execute("SELECT * FROM summaries WHERE document_id = ?", (doc["id"],)).fetchone()
+    if existing and str(existing["method"]).startswith("openai:"):
+        save_existing_summary_variant(con, doc["id"], existing)
     con.execute(
         """
         INSERT INTO summaries (document_id, overview, key_points_json, conclusions_json, method, generated_at)
@@ -665,6 +727,35 @@ def create_llm_summary(
     )
     con.commit()
     return {**summary, "generated_at": generated_at}
+
+
+def append_nvidia_run_log(
+    log_path: Path,
+    reference: str,
+    status: str,
+    duration_seconds: float,
+    error: str | None = None,
+) -> None:
+    event: dict[str, Any] = {
+        "generated_at": time.time(),
+        "reference": reference,
+        "status": status,
+        "duration_seconds": round(duration_seconds, 3),
+    }
+    if error:
+        event["error"] = error
+    with log_path.open("a", encoding="utf-8") as target:
+        target.write(json.dumps(event, ensure_ascii=False) + "\n")
+
+
+def refresh_database_snapshot(db_path: Path, snapshot_path: Path) -> None:
+    snapshot_path.parent.mkdir(parents=True, exist_ok=True)
+    with connect(db_path) as con:
+        con.execute("PRAGMA wal_checkpoint(TRUNCATE)")
+    temp_path = snapshot_path.with_suffix(snapshot_path.suffix + ".tmp")
+    with db_path.open("rb") as source, gzip.open(temp_path, "wb", compresslevel=9) as target:
+        shutil.copyfileobj(source, target)
+    temp_path.replace(snapshot_path)
 
 
 def ensure_summary_schema(con: sqlite3.Connection) -> None:
@@ -702,6 +793,7 @@ def ensure_summary_variants_schema(con: sqlite3.Connection) -> None:
 
 
 def save_summary_variant(con: sqlite3.Connection, document_id: int, summary: dict[str, Any]) -> None:
+    generated_at = float(summary.get("generated_at") or time.time())
     con.execute(
         """
         INSERT INTO summary_variants (
@@ -724,10 +816,32 @@ def save_summary_variant(con: sqlite3.Connection, document_id: int, summary: dic
             json.dumps(summary["key_points"], ensure_ascii=False),
             json.dumps(summary["conclusions"], ensure_ascii=False),
             summary["method"],
-            time.time(),
+            generated_at,
         ),
     )
     con.commit()
+
+
+def save_existing_summary_variant(con: sqlite3.Connection, document_id: int, summary: sqlite3.Row) -> None:
+    method = str(summary["method"])
+    if ":" not in method:
+        return
+    provider, model = method.split(":", 1)
+    if provider not in {"openai", "nvidia"} or not model:
+        return
+    save_summary_variant(
+        con,
+        document_id,
+        {
+            "provider": provider,
+            "model": model,
+            "overview": summary["overview"],
+            "key_points": json.loads(summary["key_points_json"]),
+            "conclusions": json.loads(summary["conclusions_json"]),
+            "method": method,
+            "generated_at": summary["generated_at"],
+        },
+    )
 
 
 def get_or_create_summary(

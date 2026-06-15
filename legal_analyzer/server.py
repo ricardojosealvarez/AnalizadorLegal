@@ -9,8 +9,8 @@ from pathlib import Path
 from urllib.parse import parse_qs, unquote, urlparse
 
 from .config import DEFAULT_DB_PATH, DEFAULT_DB_SNAPSHOT_PATH, DEFAULT_PDF_DIR
-from .llm_summarizer import LLMSummaryError
-from .store import db_summary, ensure_database_file, generate_document_llm_summary, get_document, get_pdf_path, ingest_directory, precompute_llm_summaries, precompute_nvidia_summaries, precompute_summaries, search_documents, topic_extremes, trends
+from .nvidia_summarizer import NvidiaSummaryError
+from .store import db_summary, ensure_database_file, generate_document_llm_summary, get_document, get_pdf_path, ingest_directory, precompute_llm_summaries, precompute_nvidia_summaries, precompute_nvidia_summaries_auto, precompute_summaries, search_documents, topic_extremes, trends
 from .treatment_analyzer import analyze_treatment
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -65,7 +65,7 @@ class AnalyzerHandler(BaseHTTPRequestHandler):
             reference = unquote(parsed.path.removeprefix("/api/document/").removesuffix("/llm-summary"))
             try:
                 summary = generate_document_llm_summary(self.db_path, reference, force=True)
-            except LLMSummaryError as exc:
+            except NvidiaSummaryError as exc:
                 return self.json_response({"error": str(exc)}, status=502)
             if not summary:
                 return self.not_found()
@@ -145,13 +145,23 @@ def main(argv: list[str] | None = None) -> None:
     summarize.add_argument("--limit", type=int, default=None)
     summarize.add_argument("--force", action="store_true")
 
-    summarize_llm = subcommands.add_parser("summarize-llm", help="Precompute OpenAI legal summaries")
+    summarize_llm = subcommands.add_parser("summarize-llm", help="Precompute NVIDIA legal summaries")
     summarize_llm.add_argument("--limit", type=int, default=None)
     summarize_llm.add_argument("--force", action="store_true")
 
-    summarize_nvidia = subcommands.add_parser("summarize-nvidia", help="Generate NVIDIA comparison summaries")
+    summarize_nvidia = subcommands.add_parser("summarize-nvidia", help="Precompute NVIDIA legal summaries")
     summarize_nvidia.add_argument("--limit", type=int, default=5)
     summarize_nvidia.add_argument("--force", action="store_true")
+
+    summarize_nvidia_auto = subcommands.add_parser("summarize-nvidia-auto", help="Run a budgeted NVIDIA summary batch")
+    summarize_nvidia_auto.add_argument("--max-attempts", type=int, default=12)
+    summarize_nvidia_auto.add_argument("--max-successes", type=int, default=6)
+    summarize_nvidia_auto.add_argument("--timeout", type=int, default=90)
+    summarize_nvidia_auto.add_argument("--sleep", type=float, default=10.0)
+    summarize_nvidia_auto.add_argument("--stop-after-timeouts", type=int, default=2)
+    summarize_nvidia_auto.add_argument("--log", type=Path, default=Path("data/nvidia_summary_runs.jsonl"))
+    summarize_nvidia_auto.add_argument("--no-snapshot", action="store_true")
+    summarize_nvidia_auto.add_argument("--force", action="store_true")
 
     run = subcommands.add_parser("serve", help="Run the local web app")
     run.add_argument("--host", default="127.0.0.1")
@@ -169,6 +179,20 @@ def main(argv: list[str] | None = None) -> None:
         print(json.dumps(result, indent=2, ensure_ascii=False))
     elif args.command == "summarize-nvidia":
         result = precompute_nvidia_summaries(args.db, limit=args.limit, force=args.force)
+        print(json.dumps(result, indent=2, ensure_ascii=False))
+    elif args.command == "summarize-nvidia-auto":
+        result = precompute_nvidia_summaries_auto(
+            args.db,
+            snapshot_path=DEFAULT_DB_SNAPSHOT_PATH,
+            max_attempts=args.max_attempts,
+            max_successes=args.max_successes,
+            timeout_seconds=args.timeout,
+            sleep_seconds=args.sleep,
+            stop_after_timeouts=args.stop_after_timeouts,
+            log_path=args.log,
+            force=args.force,
+            update_snapshot=not args.no_snapshot,
+        )
         print(json.dumps(result, indent=2, ensure_ascii=False))
     elif args.command == "serve":
         serve(args.db, args.pdf_dir, args.host, args.port)

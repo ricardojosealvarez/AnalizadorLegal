@@ -281,7 +281,7 @@ function summaryBlock(summary, variants, reference) {
           class="summary-action"
           type="button"
           data-reference="${escapeHtml(reference)}"
-        >${String(summary.method || "").startsWith("openai:") ? "Regenerar con OpenAI" : "Mejorar con OpenAI"}</button>
+        >${String(summary.method || "").startsWith("nvidia:") ? "Regenerar con NVIDIA" : "Mejorar con NVIDIA"}</button>
       </div>
       ${selector}
       <div id="summaryContent">
@@ -353,7 +353,7 @@ async function generateLlmSummary(reference) {
   if (!button) return;
   const originalLabel = button.textContent;
   button.disabled = true;
-  button.textContent = "Generando...";
+  button.textContent = "Generando con NVIDIA...";
   try {
     await postJson(`/api/document/${encodeURIComponent(reference)}/llm-summary`, {});
     await loadDocument(reference);
