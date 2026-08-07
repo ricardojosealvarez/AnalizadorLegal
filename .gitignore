@@ -7,3 +7,4 @@ data/extracted/
 node_modules/
 .env
 .env.local
+data/*.lock

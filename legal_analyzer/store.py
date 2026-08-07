@@ -2,13 +2,21 @@ from __future__ import annotations
 
 import hashlib
 import gzip
+import errno
 import json
+import os
 import re
 import shutil
 import sqlite3
 import time
+from contextlib import contextmanager
 from pathlib import Path
-from typing import Any
+from typing import Any, Iterator
+
+if os.name == "nt":
+    import msvcrt
+else:
+    import fcntl
 
 from .classifier import DOCTRINAL_CHANGE_PATTERNS, classify, normalize
 from .nvidia_summarizer import NvidiaSummaryError, is_nvidia_connectivity_error, summarize_with_nvidia
@@ -185,9 +193,19 @@ SPANISH_STOPWORDS = {
 }
 
 
+class ClosingConnection(sqlite3.Connection):
+    """SQLite connection that closes when its context manager exits."""
+
+    def __exit__(self, exc_type, exc_value, traceback):
+        try:
+            return super().__exit__(exc_type, exc_value, traceback)
+        finally:
+            self.close()
+
+
 def connect(db_path: Path) -> sqlite3.Connection:
     db_path.parent.mkdir(parents=True, exist_ok=True)
-    con = sqlite3.connect(str(db_path))
+    con = sqlite3.connect(str(db_path), factory=ClosingConnection)
     con.row_factory = sqlite3.Row
     con.execute("PRAGMA foreign_keys=ON")
     return con
@@ -583,10 +601,13 @@ def precompute_nvidia_summaries_auto(
     sleep_seconds: float = 10.0,
     stop_after_timeouts: int = 2,
     log_path: Path = Path("data/nvidia_summary_runs.jsonl"),
+    lock_path: Path | None = None,
     force: bool = False,
     update_snapshot: bool = True,
 ) -> dict[str, Any]:
     log_path.parent.mkdir(parents=True, exist_ok=True)
+    if lock_path is None:
+        lock_path = log_path.with_suffix(".lock")
     stats: dict[str, Any] = {
         "seen": 0,
         "attempted": 0,
@@ -597,73 +618,140 @@ def precompute_nvidia_summaries_auto(
         "references": [],
         "failures": [],
         "log_path": str(log_path),
+        "lock_path": str(lock_path),
     }
-    with connect(db_path) as con:
-        ensure_summary_schema(con)
-        ensure_summary_variants_schema(con)
-        candidates = con.execute(
-            """
-            SELECT d.*
-            FROM documents d
-            LEFT JOIN summaries s ON s.document_id = d.id
-            WHERE d.needs_ocr = 0
-              AND (? OR s.method IS NULL OR s.method NOT LIKE 'nvidia:%')
-            ORDER BY d.year DESC, d.reference DESC
-            LIMIT ?
-            """,
-            (1 if force else 0, max_attempts),
-        ).fetchall()
-        stats["seen"] = len(candidates)
-        for doc in candidates:
-            if stats["attempted"] >= max_attempts or stats["summarized"] >= max_successes:
-                break
-            stats["attempted"] += 1
-            started_at = time.time()
-            chunks = rows(
-                con,
-                "SELECT chunk_index, text FROM chunks WHERE document_id = ? ORDER BY chunk_index",
-                [doc["id"]],
-            )
-            try:
-                create_llm_summary(con, doc, chunks, timeout_seconds=timeout_seconds)
-                duration = time.time() - started_at
-                stats["summarized"] += 1
-                stats["consecutive_timeouts"] = 0
-                stats["references"].append(doc["reference"])
-                append_nvidia_run_log(log_path, doc["reference"], "ok", duration)
-            except NvidiaSummaryError as exc:
-                duration = time.time() - started_at
-                error = str(exc)
-                is_timeout = "excedio el tiempo de espera" in error.lower()
-                stats["failed"] += 1
-                stats["failures"].append({"reference": doc["reference"], "error": error})
-                if is_timeout:
-                    stats["timeouts"] += 1
-                    stats["consecutive_timeouts"] += 1
-                else:
+    with acquire_nonblocking_lock(lock_path) as acquired:
+        if not acquired:
+            stats["skipped"] = True
+            stats["stop_reason"] = "already_running"
+            stats["snapshot_updated"] = False
+            append_nvidia_run_log(log_path, "__batch__", "already_running", 0)
+            return stats
+        with connect(db_path) as con:
+            ensure_summary_schema(con)
+            ensure_summary_variants_schema(con)
+            candidates = con.execute(
+                """
+                SELECT d.*
+                FROM documents d
+                LEFT JOIN summaries s ON s.document_id = d.id
+                WHERE d.needs_ocr = 0
+                  AND (? OR s.method IS NULL OR s.method NOT LIKE 'nvidia:%')
+                ORDER BY d.year DESC, d.reference DESC
+                LIMIT ?
+                """,
+                (1 if force else 0, max_attempts),
+            ).fetchall()
+            stats["seen"] = len(candidates)
+            for doc in candidates:
+                if stats["attempted"] >= max_attempts or stats["summarized"] >= max_successes:
+                    break
+                stats["attempted"] += 1
+                started_at = time.time()
+                chunks = rows(
+                    con,
+                    "SELECT chunk_index, text FROM chunks WHERE document_id = ? ORDER BY chunk_index",
+                    [doc["id"]],
+                )
+                try:
+                    create_llm_summary(con, doc, chunks, timeout_seconds=timeout_seconds)
+                    duration = time.time() - started_at
+                    stats["summarized"] += 1
                     stats["consecutive_timeouts"] = 0
-                append_nvidia_run_log(log_path, doc["reference"], "timeout" if is_timeout else "error", duration, error)
-                error_text = error.lower()
-                if "nvidia_api_key" in error_text or "limite" in error_text or "quota" in error_text:
-                    stats["stopped_early"] = True
-                    stats["stop_reason"] = error
-                    break
-                if is_nvidia_connectivity_error(error):
-                    stats["stopped_early"] = True
-                    stats["stop_reason"] = error
-                    break
-                if stats["consecutive_timeouts"] >= stop_after_timeouts:
-                    stats["stopped_early"] = True
-                    stats["stop_reason"] = f"{stop_after_timeouts} timeouts consecutivos"
-                    break
-            if sleep_seconds > 0 and stats["attempted"] < max_attempts and stats["summarized"] < max_successes:
-                time.sleep(sleep_seconds)
+                    stats["references"].append(doc["reference"])
+                    append_nvidia_run_log(log_path, doc["reference"], "ok", duration)
+                except NvidiaSummaryError as exc:
+                    duration = time.time() - started_at
+                    error = str(exc)
+                    is_timeout = "excedio el tiempo de espera" in error.lower()
+                    stats["failed"] += 1
+                    stats["failures"].append({"reference": doc["reference"], "error": error})
+                    if is_timeout:
+                        stats["timeouts"] += 1
+                        stats["consecutive_timeouts"] += 1
+                    else:
+                        stats["consecutive_timeouts"] = 0
+                    append_nvidia_run_log(log_path, doc["reference"], "timeout" if is_timeout else "error", duration, error)
+                    error_text = error.lower()
+                    if "nvidia_api_key" in error_text or "limite" in error_text or "quota" in error_text:
+                        stats["stopped_early"] = True
+                        stats["stop_reason"] = error
+                        break
+                    if is_nvidia_connectivity_error(error):
+                        stats["stopped_early"] = True
+                        stats["stop_reason"] = error
+                        break
+                    if stats["consecutive_timeouts"] >= stop_after_timeouts:
+                        stats["stopped_early"] = True
+                        stats["stop_reason"] = f"{stop_after_timeouts} timeouts consecutivos"
+                        break
+                if sleep_seconds > 0 and stats["attempted"] < max_attempts and stats["summarized"] < max_successes:
+                    time.sleep(sleep_seconds)
     if update_snapshot and snapshot_path and stats["summarized"]:
         refresh_database_snapshot(db_path, snapshot_path)
         stats["snapshot_updated"] = True
     else:
         stats["snapshot_updated"] = False
     return stats
+
+
+@contextmanager
+def acquire_nonblocking_lock(lock_path: Path) -> Iterator[bool]:
+    lock_path.parent.mkdir(parents=True, exist_ok=True)
+
+    with lock_path.open("a+", encoding="utf-8") as lock_file:
+        if os.name == "nt":
+            lock_file.seek(0)
+            try:
+                msvcrt.locking(
+                    lock_file.fileno(),
+                    msvcrt.LK_NBLCK,
+                    1,
+                )
+            except OSError as exc:
+                if exc.errno != errno.EACCES:
+                    raise
+                yield False
+                return
+        else:
+            try:
+                fcntl.flock(
+                    lock_file.fileno(),
+                    fcntl.LOCK_EX | fcntl.LOCK_NB,
+                )
+            except OSError as exc:
+                if exc.errno not in (errno.EACCES, errno.EAGAIN):
+                    raise
+                yield False
+                return
+
+        lock_file.seek(0)
+        lock_file.truncate()
+        lock_file.write(
+            json.dumps(
+                {
+                    "pid": os.getpid(),
+                    "locked_at": time.time(),
+                }
+            )
+        )
+        lock_file.flush()
+
+        try:
+            yield True
+        finally:
+            if os.name == "nt":
+                lock_file.seek(0)
+                msvcrt.locking(
+                    lock_file.fileno(),
+                    msvcrt.LK_UNLCK,
+                    1,
+                )
+            else:
+                fcntl.flock(
+                    lock_file.fileno(),
+                    fcntl.LOCK_UN,
+                )
 
 
 def generate_document_llm_summary(db_path: Path, reference: str, force: bool = False) -> dict[str, Any] | None:
