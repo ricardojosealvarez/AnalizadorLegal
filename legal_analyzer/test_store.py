@@ -79,6 +79,7 @@ def insert_summary(
 class StoreNvidiaSummaryTests(unittest.TestCase):
     def test_create_llm_summary_promotes_nvidia_and_preserves_openai_variant(self) -> None:
         con = make_connection()
+        self.addCleanup(con.close)
         doc = insert_document(con)
         insert_summary(con, doc["id"], "openai:gpt-5.4-mini", generated_at=123.0)
         provider_result = {
@@ -223,6 +224,55 @@ class StoreNvidiaSummaryTests(unittest.TestCase):
             self.assertIn("No se pudo resolver el host de NVIDIA", result["stop_reason"])
             events = [json.loads(line) for line in log_path.read_text(encoding="utf-8").splitlines()]
             self.assertEqual([event["status"] for event in events], ["error"])
+
+    def test_precompute_nvidia_summaries_auto_skips_when_batch_is_running(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            db_path = Path(directory) / "test.sqlite"
+            log_path = Path(directory) / "runs.jsonl"
+            lock_path = Path(directory) / "runs.lock"
+            con = store.connect(db_path)
+            con.executescript(store.SCHEMA)
+            insert_document(con, "2026-0001")
+            con.close()
+
+            with store.acquire_nonblocking_lock(lock_path) as acquired:
+                self.assertTrue(acquired)
+                with patch("legal_analyzer.store.summarize_with_nvidia") as summarize:
+                    result = store.precompute_nvidia_summaries_auto(
+                        db_path,
+                        max_attempts=1,
+                        max_successes=1,
+                        sleep_seconds=0,
+                        log_path=log_path,
+                        lock_path=lock_path,
+                        update_snapshot=False,
+                    )
+
+            self.assertTrue(result["skipped"])
+            self.assertEqual(result["stop_reason"], "already_running")
+            self.assertEqual(result["attempted"], 0)
+            self.assertFalse(result["snapshot_updated"])
+            summarize.assert_not_called()
+            events = [json.loads(line) for line in log_path.read_text(encoding="utf-8").splitlines()]
+            self.assertEqual(events[0]["reference"], "__batch__")
+            self.assertEqual(events[0]["status"], "already_running")
+
+
+
+    def test_acquire_nonblocking_lock_can_reacquire_after_release(self):
+        from pathlib import Path
+        from tempfile import TemporaryDirectory
+
+        from legal_analyzer.store import acquire_nonblocking_lock
+
+        with TemporaryDirectory() as tmp:
+            lock_path = Path(tmp) / "runs.lock"
+
+            with acquire_nonblocking_lock(lock_path) as acquired:
+                self.assertTrue(acquired)
+
+            with acquire_nonblocking_lock(lock_path) as reacquired:
+                self.assertTrue(reacquired)
 
 
 if __name__ == "__main__":

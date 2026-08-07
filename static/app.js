@@ -2,7 +2,7 @@ const state = {
   stats: null,
   trends: null,
   page: 1,
-  limit: 40,
+  limit: 25,
   hasMore: false,
 };
 
@@ -50,6 +50,7 @@ async function boot() {
 }
 
 function bindEvents() {
+  $("#sidebarToggle").addEventListener("click", toggleSidebar);
   ["queryInput", "materiaFilter", "baseFilter", "regimenFilter", "yearFrom", "yearTo"].forEach((id) => {
     $(`#${id}`).addEventListener("input", debounce(() => runSearch({ resetPage: true }), 250));
     $(`#${id}`).addEventListener("change", () => runSearch({ resetPage: true }));
@@ -68,6 +69,15 @@ function bindEvents() {
     }
   });
   $("#analyzeTreatmentButton").addEventListener("click", analyzeTreatment);
+}
+
+function toggleSidebar() {
+  const collapsed = document.body.classList.toggle("sidebar-collapsed");
+  const button = $("#sidebarToggle");
+  button.textContent = collapsed ? "›" : "‹";
+  button.setAttribute("aria-label", collapsed ? "Mostrar panel lateral" : "Ocultar panel lateral");
+  button.setAttribute("aria-expanded", String(!collapsed));
+  requestAnimationFrame(() => renderTimeline(state.stats.years));
 }
 
 async function analyzeTreatment() {
@@ -258,7 +268,7 @@ function summaryBlock(summary, variants, reference) {
   if (!summary) return "";
   const summaries = [summary, ...variants];
   const selector = summaries.length > 1
-    ? `<div class="summary-provider-tabs" role="tablist" aria-label="Proveedor del resumen">
+    ? `<div class="summary-provider-tabs" role="tablist" aria-label="Versiones del resumen">
         ${summaries.map((item, index) => `
           <button
             class="summary-provider-tab ${index === 0 ? "active" : ""}"
@@ -266,7 +276,7 @@ function summaryBlock(summary, variants, reference) {
             role="tab"
             aria-selected="${index === 0 ? "true" : "false"}"
             data-summary-index="${index}"
-          >${escapeHtml(summaryProviderName(item))}</button>
+          >${escapeHtml(summaryTabName(index))}</button>
         `).join("")}
       </div>`
     : "";
@@ -281,7 +291,7 @@ function summaryBlock(summary, variants, reference) {
           class="summary-action"
           type="button"
           data-reference="${escapeHtml(reference)}"
-        >${String(summary.method || "").startsWith("nvidia:") ? "Regenerar con NVIDIA" : "Mejorar con NVIDIA"}</button>
+        >Regenerar</button>
       </div>
       ${selector}
       <div id="summaryContent">
@@ -327,6 +337,10 @@ function bindSummaryVariants() {
   });
 }
 
+function summaryTabName(index) {
+  return index === 0 ? "Actual" : `Variante ${index}`;
+}
+
 function summaryProviderName(summary) {
   const method = String(summary.method || "");
   if (method.startsWith("openai:")) return "OpenAI";
@@ -338,7 +352,7 @@ function summarySourceLabel(summary) {
   const provider = summaryProviderName(summary);
   if (provider === "Extractivo") return "Resumen extractivo";
   const model = summary.model || String(summary.method || "").split(":").slice(1).join(":");
-  return `${provider} · ${model}`;
+  return `${provider} \u00b7 ${model}`;
 }
 
 function safeJsonForHtml(value) {
@@ -353,7 +367,7 @@ async function generateLlmSummary(reference) {
   if (!button) return;
   const originalLabel = button.textContent;
   button.disabled = true;
-  button.textContent = "Generando con NVIDIA...";
+  button.textContent = "Regenerando...";
   try {
     await postJson(`/api/document/${encodeURIComponent(reference)}/llm-summary`, {});
     await loadDocument(reference);
@@ -434,8 +448,32 @@ function renderTimeline(years) {
 
 function renderRankList(selector, items) {
   $(selector).innerHTML = items
-    .map((item) => `<div class="rank-row"><span>${escapeHtml(item.label)}</span><strong>${item.count}</strong></div>`)
+    .map(
+      (item) => `
+        <a class="rank-row" href="#explorar" data-filter-key="materia" data-filter-value="${escapeHtml(item.label)}">
+          <span>${escapeHtml(item.label)}</span>
+          <strong>${item.count}</strong>
+        </a>`
+    )
     .join("");
+  $(selector).querySelectorAll(".rank-row").forEach((link) => {
+    link.addEventListener("click", (event) => {
+      event.preventDefault();
+      applyTopicFilter(link.dataset.filterKey, link.dataset.filterValue);
+    });
+  });
+}
+
+function applyTopicFilter(key, value) {
+  if (key !== "materia" || !value) return;
+  $("#queryInput").value = "";
+  $("#materiaFilter").value = value;
+  $("#baseFilter").value = "";
+  $("#regimenFilter").value = "";
+  $("#yearFrom").value = "";
+  $("#yearTo").value = "";
+  document.querySelector("#explorar").scrollIntoView({ behavior: "smooth", block: "start" });
+  runSearch({ resetPage: true });
 }
 
 function renderChangeCandidates() {
